@@ -1,0 +1,21 @@
+package com.project.dto;
+
+import lombok.Getter;
+import lombok.Setter;
+import lombok.ToString;
+
+import java.util.Date;
+import java.util.List;
+
+@Getter
+@Setter
+@ToString
+public class QuestionDto extends AbstractDto{
+    private String title;
+    private String content;
+    private String type;
+    private Integer maxPoint;
+    private Date timeAnswer;
+    private Long examId;
+    private List<AnswerDto> answers;
+}
