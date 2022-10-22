@@ -20,6 +20,7 @@ public class AnswerEntity extends BaseEntity{
 	private static final long serialVersionUID = 1L;
 	@Column(columnDefinition = "TEXT")
 	private String content;
+
 	@Column
 	private int isResult;
 

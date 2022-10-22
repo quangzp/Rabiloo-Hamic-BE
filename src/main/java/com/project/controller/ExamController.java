@@ -11,6 +11,9 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.io.IOException;
 
 @RestController
 @RequestMapping("/api")
@@ -78,5 +81,10 @@ public class ExamController {
                 .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=exam.xlsx")
                 .contentType(MediaType.parseMediaType("application/vnd.ms-excel; charset=UTF-8"))
                 .body(file);
+    }
+
+    @PostMapping("public/test-import-excel")
+    public void importExamFromExcel(@RequestParam MultipartFile file) throws IOException {
+        service.createExcelFileFromExam(file);
     }
 }

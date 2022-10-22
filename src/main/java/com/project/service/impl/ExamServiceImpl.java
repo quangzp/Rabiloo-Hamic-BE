@@ -1,10 +1,12 @@
 package com.project.service.impl;
 
+import com.google.common.collect.Lists;
 import com.project.dto.ExamDto;
 import com.project.entity.AnswerEntity;
 import com.project.entity.ExamEntity;
 import com.project.entity.MediaEntity;
 import com.project.entity.QuestionEntity;
+import com.project.enums.QuestionType;
 import com.project.repository.ExamRepository;
 import com.project.repository.ExamRepositoryCustom;
 import com.project.request.ExamFilterRequest;
@@ -14,16 +16,14 @@ import com.project.service.AnswerService;
 import com.project.service.ExamService;
 import com.project.service.QuestionService;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.poi.ss.usermodel.Cell;
-import org.apache.poi.ss.usermodel.Row;
-import org.apache.poi.ss.usermodel.Sheet;
-import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -409,4 +409,105 @@ public class ExamServiceImpl implements ExamService {
         return dto;
     }
 
+    public void createExcelFileFromExam(MultipartFile file) throws IOException {
+        Workbook workbook = new XSSFWorkbook(file.getInputStream());
+        Sheet sheet = workbook.getSheetAt(0);
+
+        List<Row> rows = Lists.newArrayList(sheet.rowIterator());
+        rows.remove(0);
+        List<QuestionEntity> questions = new ArrayList<>();
+
+        List<Row> rs = new ArrayList<>();
+        for (Row row : rows) {
+            Cell firstCell = row.cellIterator().next();
+            if (firstCell.getColumnIndex() > 0) {
+                rs.add(row);
+            } else {
+                if(rs.size() == 0) {
+                    rs.add(row);
+                    continue;
+                }
+                questions.add(createQuestionFromRows(rs));
+                rs = new ArrayList<>();
+                rs.add(row);
+            }
+        }
+
+        System.out.println("abc");
+    }
+
+    private QuestionEntity createQuestionFromRows(List<Row> rows) {
+        QuestionEntity question = new QuestionEntity();
+        Row firstRow = rows.get(0);
+        List<Cell> cells = Lists.newArrayList(firstRow.cellIterator());
+        setContentForQuestion(question, cells.get(1));
+        setMaxPointForQuestion(question, cells.get(3));
+        setTypeForQuestion(question, cells.get(4));
+        List<AnswerEntity> answers = new ArrayList<>();
+
+        for (int i = 0; i < rows.size(); i++) {
+            answers.add(createAnswerFromRow(rows.get(i), i));
+        }
+
+        question.setAnswers(answers);
+
+        //todo create media
+
+        return question;
+    }
+
+    private void setContentForQuestion(QuestionEntity question, Cell cell) {
+        try {
+            question.setContent(cell.getStringCellValue());
+        } catch (Exception exception) {
+            log.info("set content for question fail");
+        }
+    }
+
+    private void setMaxPointForQuestion(QuestionEntity question, Cell cell) {
+        try {
+            question.setMaxPoint(Double.valueOf(cell.getNumericCellValue()).intValue());
+        } catch (Exception exception) {
+            log.info("set max point for question fail");
+        }
+    }
+
+    private void setTypeForQuestion(QuestionEntity question, Cell cell) {
+        try {
+            question.setType(QuestionType.valueOf(cell.getStringCellValue()));
+        } catch (Exception exception) {
+            log.info("set type for question fail");
+        }
+    }
+
+    private AnswerEntity createAnswerFromRow(Row row, int index) {
+
+        AnswerEntity answer = new AnswerEntity();
+        List<Cell> cells = Lists.newArrayList(row.cellIterator());
+        if (index == 0) {
+            setContentForAnswer(answer, cells.get(6));
+            setResultForAnswer(answer, cells.get(7));
+        } else {
+            setContentForAnswer(answer, cells.get(0));
+            setResultForAnswer(answer, cells.get(1));
+        }
+
+        return answer;
+    }
+
+    private void setContentForAnswer(AnswerEntity answer, Cell cell) {
+        try {
+            answer.setContent(cell.getStringCellValue());
+        } catch (Exception e) {
+            log.info("set content for answer fail");
+        }
+    }
+
+    private void setResultForAnswer(AnswerEntity answer, Cell cell) {
+        try {
+            answer.setIsResult(Double.valueOf(cell.getNumericCellValue()).intValue());
+        } catch (Exception e) {
+            log.info("set content for answer fail");
+        }
+    }
 }

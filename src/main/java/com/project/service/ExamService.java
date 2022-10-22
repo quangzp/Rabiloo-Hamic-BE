@@ -4,8 +4,10 @@ import com.project.entity.ExamEntity;
 import com.project.request.ExamFilterRequest;
 import com.project.request.ExamRequest;
 import com.project.response.ExamResponse;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.io.ByteArrayInputStream;
+import java.io.IOException;
 
 public interface ExamService extends BaseService<ExamResponse,ExamRequest>{
 
@@ -20,4 +22,6 @@ public interface ExamService extends BaseService<ExamResponse,ExamRequest>{
 
 
     ByteArrayInputStream genExamExcelFile(Long examId);
+
+    void createExcelFileFromExam(MultipartFile file) throws IOException;
 }
