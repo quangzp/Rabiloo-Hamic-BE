@@ -26,7 +26,8 @@ public class ExamResultController {
 
     @PutMapping("/public/exam-submit")
     public ExamResultResponse submitExam(@RequestBody ExamResultRequest req){
-        return service.submit(req);
+        //return service.submit(req);
+        return null;
     }
 
 

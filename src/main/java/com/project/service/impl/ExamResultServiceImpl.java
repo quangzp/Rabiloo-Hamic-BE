@@ -1,12 +1,12 @@
 package com.project.service.impl;
 
 import com.project.dto.ExamResultDto;
-import com.project.dto.QuestionResultDto;
-import com.project.entity.ExamEntity;
 import com.project.entity.ExamResultEntity;
+import com.project.entity.UserEntity;
 import com.project.repository.ExamResultRepository;
 import com.project.request.ExamResultFilterRequest;
 import com.project.request.ExamResultRequest;
+import com.project.request.submit_exam.SubmitExamRequest;
 import com.project.response.ExamResultResponse;
 import com.project.security.CustomUserDetail;
 import com.project.service.ExamResultService;
@@ -22,10 +22,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 @Service
 @Slf4j
@@ -91,12 +88,18 @@ public class ExamResultServiceImpl implements ExamResultService {
     @Override
     public ExamResultResponse create(ExamResultRequest req) {
         req.setStart_time(new Date().getTime());
-        return save(req);
+        String uuid = UUID.randomUUID().toString();
+        req.setUuid(uuid);
+
+        /*if(selfSubmit(req) == null){
+
+        }*/
+        return null;
     }
 
     @Override
     public ExamResultResponse update(ExamResultRequest req) {
-        Optional<ExamResultEntity> examResultEntityOptional = repository.findById(req.getId());
+        /*Optional<ExamResultEntity> examResultEntityOptional = repository.findById(req.getId());
 
         ExamResultResponse response = new ExamResultResponse();
         if(!examResultEntityOptional.isPresent()){
@@ -113,10 +116,12 @@ public class ExamResultServiceImpl implements ExamResultService {
             }
         }
 
-        return save(req);
+        return save(req);*/
+
+        return null;
     }
 
-    private ExamResultResponse save(ExamResultRequest req) {
+    /*private ExamResultResponse save(ExamResultRequest req) {
         Optional<ExamEntity> examEntityOptional = examService.findById(req.getExamId());
 
         ExamResultResponse response = new ExamResultResponse();
@@ -129,7 +134,7 @@ public class ExamResultServiceImpl implements ExamResultService {
         ExamResultEntity entity = mapper.map(req,ExamResultEntity.class);
         entity.setExam(examEntityOptional.get());
 
-        /*if(req.getUserId() != null){
+        *//*if(req.getUserId() != null){
             Optional<UserEntity> userEntityOptional = userService.findById(req.getUserId());
             if(!userEntityOptional.isPresent()){
                 response.setMessage("User is not true");
@@ -137,7 +142,7 @@ public class ExamResultServiceImpl implements ExamResultService {
                 return response;
             }
             entity.setUser(userEntityOptional.get());
-        }*/
+        }*//*
 
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
@@ -153,7 +158,7 @@ public class ExamResultServiceImpl implements ExamResultService {
         response.setStatusCode(HttpStatus.OK);
 
         return response;
-    }
+    }*/
 
     @Override
     public ExamResultResponse delete(Long id) {
@@ -181,8 +186,8 @@ public class ExamResultServiceImpl implements ExamResultService {
     }
 
     @Override
-    public ExamResultResponse submit(ExamResultRequest req) {
-        Optional<ExamResultEntity> examResultEntityOptional = repository.findById(req.getId());
+    public ExamResultResponse submit(SubmitExamRequest req) {
+        Optional<ExamResultEntity> examResultEntityOptional = repository.findById(req.getExamResultId());
 
         ExamResultResponse response = new ExamResultResponse();
         if(!examResultEntityOptional.isPresent()){
@@ -191,19 +196,9 @@ public class ExamResultServiceImpl implements ExamResultService {
             return response;
         }
 
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-
-        if (authentication != null && authentication.isAuthenticated()) {
-            String userName = ((CustomUserDetail) authentication.getPrincipal()).getUsername();
-            if(!userName.equals(examResultEntityOptional.get().getUser().getUserName())){
-                response.setMessage("User is not true");
-                response.setStatusCode(HttpStatus.NOT_FOUND);
-                return response;
-            }
-        }
 
         try {
-            List<QuestionResultDto> questionResultDtos = questionResultService.saveAll(req.getQuestionResultRequests());
+           /* List<QuestionResultDto> questionResultDtos = questionResultService.saveAll(req.getQuestionResultRequests());
 
             int totalPoint = 0;
             for (QuestionResultDto questionResultDto : questionResultDtos) {
@@ -214,13 +209,14 @@ public class ExamResultServiceImpl implements ExamResultService {
 
             req.setEnd_time(new Date().getTime());
 
-            return save(req);
+            return save(req);*/
         }catch (Exception e){
             throw e;
             /*response.setMessage("Something wrong");
             response.setStatusCode(HttpStatus.BAD_REQUEST);
             return response;*/
         }
+        return null;
     }
 
     @Override
@@ -242,6 +238,20 @@ public class ExamResultServiceImpl implements ExamResultService {
         }
 
         return response;
+    }
+
+    private UserEntity selfSubmit(ExamResultEntity examResultEntity){
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
+        if (authentication != null && authentication.isAuthenticated()) {
+            String userName = ((CustomUserDetail) authentication.getPrincipal()).getUsername();
+            UserEntity user = examResultEntity.getUser();
+            if(!userName.equals(user.getUserName())){
+                return user;
+            }
+        }
+
+        return null;
     }
 
 }

@@ -12,6 +12,7 @@ import java.util.List;
 @Getter
 @Setter
 public class ExamResultEntity extends  BaseEntity{
+    private String uuid;
     @Column
     private Integer points;
     @Column

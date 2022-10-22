@@ -83,7 +83,7 @@ public class ExamServiceImpl implements ExamService {
             response.setStatusCode(HttpStatus.OK);
         }else {
             List<ExamDto> dtos = new ArrayList<>();
-            entities.forEach(e -> dtos.add(mapper.map(e, ExamDto.class)));
+            entities.forEach(e -> dtos.add(toDto(e)));
 
             response.setDtos(dtos);
             response.setMessage("OK");
@@ -253,48 +253,15 @@ public class ExamServiceImpl implements ExamService {
     }
 
     @Override
-    public ExamResponse findPrivateExams() {
-        List<ExamEntity> entities = repository.findByCodeNotNullAndDeletedFalse();
-
-        List<ExamDto> dtos = new ArrayList<>();
-        entities.forEach(e-> dtos.add(mapper.map(e,ExamDto.class)));
-
-        ExamResponse response = new ExamResponse();
-        response.setDtos(dtos);
-        response.setMessage("Ok");
-        response.setStatusCode(HttpStatus.OK);
-
-        return response;
-    }
-
-    @Override
     public ExamResponse findPublicExams() {
         List<ExamEntity> entities = repository.findByCodeNullAndDeletedFalse();
 
         List<ExamDto> dtos = new ArrayList<>();
-        entities.forEach(e-> dtos.add(mapper.map(e,ExamDto.class)));
-
+        entities.forEach(e-> dtos.add(toDto(e)));
         ExamResponse response = new ExamResponse();
         response.setDtos(dtos);
         response.setMessage("Ok");
         response.setStatusCode(HttpStatus.OK);
-
-        return response;
-    }
-
-    @Override
-    public ExamResponse findPrivateExam(Long id) {
-        ExamEntity exam = repository.findByIdAndCodeNotNullAndDeletedFalse(id);
-
-        ExamResponse response = new ExamResponse();
-        if(exam == null){
-            response.setMessage("exam not found");
-            response.setStatusCode(HttpStatus.NOT_FOUND);
-        }else {
-            response.setDto(mapper.map(exam, ExamDto.class));
-            response.setMessage("OK");
-            response.setStatusCode(HttpStatus.OK);
-        }
 
         return response;
     }
@@ -311,7 +278,7 @@ public class ExamServiceImpl implements ExamService {
             printHeaders(sheet, HEADER_QUESTION, 0);
 
             int rowIndex = 1;
-            Set<QuestionEntity> questions = exam.getQuestions();
+            List<QuestionEntity> questions = exam.getQuestions();
             int questionIndex = 0;
             for (QuestionEntity question : questions) {
                 int imagesSize = question.getImages() == null ? 0 : question.getImages().size();
@@ -406,4 +373,18 @@ public class ExamServiceImpl implements ExamService {
             cell.setCellValue((Date) r);
         }
     }
+
+    ExamDto toDto(ExamEntity entity){
+        ExamDto dto = new ExamDto();
+
+        dto.setId(entity.getId());
+        dto.setCode(entity.getCode());
+        dto.setTitle(entity.getTitle());
+        dto.setDescription(entity.getDescription());
+        dto.setStartFrom(entity.getStartFrom());
+        dto.setEndTo(entity.getEndTo());
+
+        return dto;
+    }
+
 }

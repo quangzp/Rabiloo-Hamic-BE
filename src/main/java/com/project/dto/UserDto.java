@@ -3,11 +3,16 @@ package com.project.dto;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.util.List;
+
 @Getter
 @Setter
-public class UserDto extends AbstractDto{
+public class UserDto extends BaseDto {
 	private String userName;
-	private String password;
 	private String lastName;
-	private String fullName;
+	private String firstName;
+	private Long birthDay;
+	private String gender;
+	private String city;
+	private List<RoleDto> roles;
 }

@@ -224,30 +224,11 @@ public class QuestionResultServiceImpl implements QuestionResultService {
                 }*/
                 questionResult.setAnswers(answers);
 
-                // set point
-                boolean flag = true;
-                for (AnswerEntity answer : answers) {
-                    if (answer.getIsResult() == 0) {
-                        flag = false;
-                        break;
-                    }
-                }
+                // calculate point and set
+                questionResult.setPoint(calculatePoint(answers));
 
-                if (flag) {
-                    questionResult.setPoint(questionEntity.getMaxPoint());
-                } else {
-                    questionResult.setPoint(0);
-                }
+                entities.add(questionResult);
             }
-
-            /*Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-
-            if (authentication != null && authentication.isAuthenticated()) {
-                String userName = ((CustomUserDetail) authentication.getPrincipal()).getUsername();
-                questionResult.setUser(userService.findByUserName(userName));
-            }*/
-
-            entities.add(questionResult);
         }
 
         List<QuestionResultEntity> questionResults = repository.saveAll(entities);
@@ -257,4 +238,14 @@ public class QuestionResultServiceImpl implements QuestionResultService {
 
         return dtos;
     }
+
+    private Integer calculatePoint(List<AnswerEntity> answers) {
+        for (AnswerEntity answer : answers) {
+            if(answer.getIsResult() == 0){
+                return 0;
+            }
+        }
+        return 10;
+    }
 }
+

@@ -7,7 +7,7 @@ import javax.validation.constraints.NotBlank;
 
 @Getter
 @Setter
-public class AnswerDto extends AbstractDto{
+public class AnswerDto extends BaseDto {
     @NotBlank
     private String content;
     private int isResult;

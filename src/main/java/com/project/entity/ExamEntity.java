@@ -3,12 +3,10 @@ package com.project.entity;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.Accessors;
-import org.hibernate.annotations.LazyCollection;
-import org.hibernate.annotations.LazyCollectionOption;
 
 import javax.persistence.*;
 import java.util.Date;
-import java.util.Set;
+import java.util.List;
 
 @Entity
 @Table(name = "`exam`")
@@ -34,14 +32,14 @@ public class ExamEntity extends BaseEntity{
 	@Column
 	private Date endTo;
 
-	@LazyCollection(LazyCollectionOption.FALSE)
-	@OneToMany(mappedBy = "exam")
-	private Set<QuestionEntity> questions;
+	@OneToMany(mappedBy = "exam",cascade = CascadeType.ALL,fetch = FetchType.LAZY)
+
+	private List<QuestionEntity> questions;
 
 	@OneToMany(mappedBy = "exam")
-	private Set<ExamResultEntity> examResults;
+	private List<ExamResultEntity> examResults;
 
 	@ManyToMany(mappedBy = "exams")
-	private Set<UserEntity> user;
+	private List<UserEntity> user;
 
 }

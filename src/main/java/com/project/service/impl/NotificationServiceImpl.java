@@ -1,0 +1,105 @@
+package com.project.service.impl;
+
+import com.project.dto.AnswerDto;
+import com.project.dto.NotificationDto;
+import com.project.entity.NotificationEntity;
+import com.project.repository.NotificationRepository;
+import com.project.request.NotificationRequest;
+import com.project.response.NotificationResponse;
+import com.project.service.NotificationService;
+import org.modelmapper.ModelMapper;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.stereotype.Service;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
+
+@Service
+public class NotificationServiceImpl implements NotificationService {
+
+    @Autowired
+    private NotificationRepository repository;
+
+    @Autowired
+    private ModelMapper mapper;
+
+    @Override
+    public NotificationResponse findAll() {
+        List<NotificationEntity> entities = repository.findByDeletedFalse();
+        NotificationResponse response = new NotificationResponse();
+        if (entities.isEmpty()) {
+            response.setMessage("answers is null");
+            response.setStatusCode(HttpStatus.NOT_FOUND);
+        } else {
+            List<NotificationDto> dtos = new ArrayList<>();
+            entities.forEach(e -> dtos.add(mapper.map(e, NotificationDto.class)));
+            response.setDtos(dtos);
+            response.setMessage("OK");
+            response.setStatusCode(HttpStatus.OK);
+        }
+
+        return response;
+    }
+
+    @Override
+    public NotificationResponse findOne(Long id) {
+        NotificationEntity entity = repository.findByIdAndDeletedFalse(id);
+
+        NotificationResponse response = new NotificationResponse();
+        if (entity == null) {
+            response.setMessage("answer not found");
+            response.setStatusCode(HttpStatus.NOT_FOUND);
+        } else {
+            NotificationDto dto = mapper.map(entity, NotificationDto.class);
+            response.setDto(dto);
+            response.setMessage("ok");
+            response.setStatusCode(HttpStatus.OK);
+        }
+        return response;
+    }
+
+    @Override
+    public NotificationResponse create(NotificationRequest req) {
+        NotificationResponse response = new NotificationResponse();
+        if(req == null){
+            response.setMessage("notification is null");
+            response.setStatusCode(HttpStatus.BAD_REQUEST);
+        }else {
+            NotificationEntity entity = mapper.map(req,NotificationEntity.class);
+
+            NotificationDto dto = mapper.map(repository.save(entity),NotificationDto.class);
+            response.setDto(dto);
+            response.setMessage("OK");
+            response.setStatusCode(HttpStatus.OK);
+        }
+
+        return response;
+    }
+
+    @Override
+    public NotificationResponse update(NotificationRequest req) {
+        return null;
+    }
+
+    @Override
+    public NotificationResponse delete(Long id) {
+        Optional<NotificationEntity> optional = repository.findById(id);
+
+        NotificationResponse response = new NotificationResponse();
+        if (!optional.isPresent()) {
+            response.setMessage("Answer is not found");
+            response.setStatusCode(HttpStatus.NOT_FOUND);
+        } else {
+            NotificationEntity entity = optional.get();
+            entity.setDeleted(true);
+            AnswerDto dto = mapper.map(repository.save(entity), AnswerDto.class);
+
+            response.setMessage("OK");
+            response.setStatusCode(HttpStatus.OK);
+        }
+
+        return response;
+    }
+}

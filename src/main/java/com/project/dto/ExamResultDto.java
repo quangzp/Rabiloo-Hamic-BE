@@ -7,7 +7,7 @@ import java.util.Date;
 
 @Getter
 @Setter
-public class ExamResultDto extends AbstractDto{
+public class ExamResultDto extends BaseDto {
     private Integer points;
     private Date start_time;
     private Date end_time;

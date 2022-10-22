@@ -5,7 +5,7 @@ import lombok.Setter;
 
 @Getter
 @Setter
-public class QuestionResultDto extends AbstractDto{
+public class QuestionResultDto extends BaseDto {
     private String content;
     private Integer point;
 }

@@ -6,6 +6,7 @@ import org.springframework.util.CollectionUtils;
 
 import javax.persistence.*;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 @Entity
@@ -29,11 +30,18 @@ public class UserEntity extends BaseEntity{
 	
 	@Column(name = "last_name")
 	private String lastName;
+
+	@Column(name = "birth_day")
+	private Date birthDay;
+
+	private String gender;
+
+	private String city;
 	
 	@Column(name = "active")
 	private int active = 1; // default account is active
 	
-	@ManyToMany(fetch = FetchType.LAZY)
+	@ManyToMany(fetch = FetchType.LAZY,cascade = CascadeType.ALL)
     @JoinTable(name = "user_role", joinColumns = @JoinColumn(name = "user_id"), inverseJoinColumns = @JoinColumn(name = "role_id"))
     private List<RoleEntity> roles;
 
@@ -43,9 +51,6 @@ public class UserEntity extends BaseEntity{
 
 	@OneToMany(mappedBy = "user")
 	private List<ExamResultEntity> examResults;
-
-	/*@OneToMany(mappedBy = "user")
-	private List<QuestionResultEntity> questionResults;*/
 	
 	public void addRole(RoleEntity role) {
 		if(CollectionUtils.isEmpty(this.roles)) {

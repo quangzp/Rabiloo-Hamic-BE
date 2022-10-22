@@ -15,20 +15,24 @@ public interface ExamRepository extends JpaRepository<ExamEntity, Long>{
     @EntityGraph(attributePaths = {"questions", "questions.answers"})
     ExamEntity findByIdAndCodeNullAndDeletedFalse(Long id);
 
-    @EntityGraph(attributePaths = {"questions", "questions.answers"})
+    //@EntityGraph(attributePaths = {"questions", "questions.answers"})
+    @Query(value = "select * from exam" +
+            " where exam.code is null" +
+            " and exam.deleted = false",nativeQuery = true)
     List<ExamEntity> findByCodeNullAndDeletedFalse();
 
 
     @EntityGraph(attributePaths = {"questions", "questions.answers"})
     ExamEntity findByIdAndCodeNotNullAndDeletedFalse(Long id);
 
-    @EntityGraph(attributePaths = {"questions", "questions.answers"})
+    //@EntityGraph(attributePaths = {"questions", "questions.answers"})
     List<ExamEntity> findByCodeNotNullAndDeletedFalse();
 
     @EntityGraph(attributePaths = {"questions", "questions.answers"})
     ExamEntity findByIdAndDeletedFalse(Long id);
 
-    @EntityGraph(attributePaths = {"questions", "questions.answers"})
+    //@EntityGraph(attributePaths = {"questions", "questions.answers"})
+    @Query(value = "select * from exam where exam.deleted = false",nativeQuery = true)
     List<ExamEntity> findByDeletedFalse();
 
 

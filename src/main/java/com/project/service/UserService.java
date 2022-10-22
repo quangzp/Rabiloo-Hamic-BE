@@ -13,4 +13,6 @@ public interface UserService extends BaseService<UserResponse,UserRequest>{
     UserEntity findByUserName(String userName);
 
     UserResponse updateUserInfo(UserRequest request);
+
+    UserResponse getCurrent();
 }

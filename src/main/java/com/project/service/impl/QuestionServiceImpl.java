@@ -147,7 +147,7 @@ public class QuestionServiceImpl implements QuestionService {
 		} else {
 			QuestionEntity entity = optional.get();
 			entity.setDeleted(true);
-			QuestionDto dto = mapper.map(repository.save(entity), QuestionDto.class);
+			repository.save(entity);
 
 			response.setMessage("OK");
 			response.setStatusCode(HttpStatus.OK);

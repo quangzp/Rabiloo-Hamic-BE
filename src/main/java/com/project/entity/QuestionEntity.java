@@ -24,8 +24,8 @@ public class QuestionEntity extends BaseEntity{
 	 */
 	private static final long serialVersionUID = 1L;
 	
-	@Column
-	private String title;
+	/*@Column
+	private String title;*/
 	@Column(columnDefinition = "TEXT")
 	private String content;
 	@Column
@@ -36,8 +36,8 @@ public class QuestionEntity extends BaseEntity{
 	@Column
 	private Integer maxPoint;
 
-	@LazyCollection(LazyCollectionOption.FALSE)
-	@OneToMany(mappedBy = "question")
+	@LazyCollection(LazyCollectionOption.TRUE)
+	@OneToMany(mappedBy = "question",cascade = CascadeType.ALL)
 	private Set<AnswerEntity> answers;
 
 	@OneToMany(mappedBy = "question")
@@ -55,5 +55,7 @@ public class QuestionEntity extends BaseEntity{
 	@JoinColumn(name = "category_id")
 	private CategoryEntity category;
 
+	private String answerWithTextsResult; // Lien Xo|Nga|Lien Bang Nga
 
+	private boolean requireAdminGiveGrade; // default values false
 }

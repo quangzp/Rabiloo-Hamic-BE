@@ -16,11 +16,9 @@ public interface ExamService extends BaseService<ExamResponse,ExamRequest>{
 
     ExamResponse findExamsByParamNative(ExamFilterRequest request);
 
-    ExamResponse findPrivateExams();
 
     ExamResponse findPublicExams();
 
-    ExamResponse findPrivateExam(Long id);
 
     ByteArrayInputStream genExamExcelFile(Long examId);
 }

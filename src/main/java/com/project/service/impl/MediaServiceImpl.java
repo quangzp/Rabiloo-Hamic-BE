@@ -1,12 +1,15 @@
 package com.project.service.impl;
 
+import com.project.entity.MediaEntity;
 import com.project.repository.MediaRepository;
 import com.project.request.MediaRequest;
 import com.project.response.MediaResponse;
 import com.project.service.MediaService;
 import com.project.service.QuestionService;
+import com.project.service.StorageService;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -18,9 +21,15 @@ public class MediaServiceImpl implements MediaService {
 	@Autowired
 	private QuestionService questionService;
 
+	private StorageService storageService;
+
+	@Autowired
+	public MediaServiceImpl(StorageService storageService) {
+		this.storageService = storageService;
+	}
+
 	@Autowired
 	private ModelMapper mapper;
-
 
 	@Override
 	public MediaResponse findAll() {
@@ -52,6 +61,8 @@ public class MediaServiceImpl implements MediaService {
 
 	@Override
 	public MediaResponse create(MediaRequest req) {
+
+
 		return save(req);
 	}
 
@@ -85,14 +96,20 @@ public class MediaServiceImpl implements MediaService {
 
 	@Override
 	public MediaResponse delete(Long id) {
-		/*try {
-			repository.deleteById(id);
-			return new ResponseEntity<>(HttpStatus.OK);
-		}catch (Exception e){
-			return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
-		}*/
+		MediaEntity entity = repository.findById(id).get();
+		MediaResponse response = new MediaResponse();
+		if(entity == null){
+			response.setMessage("NOT FOUND");
+			response.setStatusCode(HttpStatus.BAD_REQUEST);
+		}else {
+			entity.setDeleted(true);
+			repository.save(entity);
 
-		return null;
+			response.setMessage("OK");
+			response.setStatusCode(HttpStatus.OK);
+		}
+
+		return response;
 	}
 	
 }

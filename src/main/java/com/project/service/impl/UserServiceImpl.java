@@ -1,14 +1,18 @@
 package com.project.service.impl;
 
 import com.project.dto.UserDto;
+import com.project.entity.RoleEntity;
 import com.project.entity.UserEntity;
 import com.project.repository.UserRepository;
 import com.project.request.UserRequest;
 import com.project.response.UserResponse;
+import com.project.security.CustomUserDetail;
 import com.project.service.UserService;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -82,10 +86,11 @@ public class UserServiceImpl implements UserService{
 		}
 
 		user = mapper.map(req,UserEntity.class);
+		RoleEntity urole = new RoleEntity("ROLE_USER");
+		user.addRole(urole);
 		user.setPassword(passwordEncoder.encode(req.getPassword()));
 
 		UserDto dto = mapper.map(repository.save(user),UserDto.class);
-		dto.setPassword(req.getPassword());
 
 		response.setDto(dto);
 		response.setMessage("ok");
@@ -147,7 +152,7 @@ public class UserServiceImpl implements UserService{
 
 		UserResponse response = new UserResponse();
 		if(request.getId() == null) {
-			response.setMessage("Answer is not found");
+			response.setMessage("User is not found");
 			response.setStatusCode(HttpStatus.NOT_FOUND);
 			return response;
 		}
@@ -155,7 +160,7 @@ public class UserServiceImpl implements UserService{
 		Optional<UserEntity> userOptional = repository.findById(request.getId());
 
 		if(!userOptional.isPresent()) {
-			response.setMessage("Answer is not found");
+			response.setMessage("User is not found");
 			response.setStatusCode(HttpStatus.NOT_FOUND);
 			return response;
 		}
@@ -163,11 +168,33 @@ public class UserServiceImpl implements UserService{
 		UserEntity user = userOptional.get();
 		user.setFirstName(request.getFirstName());
 		user.setLastName(request.getLastName());
+		user.setGender(request.getGender());
+		user.setBirthDay(new Date(request.getBirthDay()));
 		user.setModifiedDate(new Date());
+		user.setModifiedBy(user.getId());
 
 		response.setDto(mapper.map(repository.save(user),UserDto.class));
 		response.setMessage("OK");
 		response.setStatusCode(HttpStatus.OK);
+		return response;
+	}
+
+	@Override
+	public UserResponse getCurrent() {
+		Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+
+		UserResponse response = new UserResponse();
+		if (auth != null && auth.isAuthenticated()) {
+			String userName = ((CustomUserDetail) auth.getPrincipal()).getUsername();
+			UserEntity user = repository.findByUserName(userName);
+			UserDto dto = mapper.map(repository.findByUserName(userName), UserDto.class);
+			 response.setDto(mapper.map(repository.findByUserName(userName), UserDto.class));
+			 response.setStatusCode(HttpStatus.OK);
+			 response.setMessage("OK");
+		}else {
+			response.setMessage("Not authentication");
+			response.setStatusCode(HttpStatus.UNAUTHORIZED);
+		}
 		return response;
 	}
 }

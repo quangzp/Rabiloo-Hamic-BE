@@ -10,7 +10,7 @@ import java.util.List;
 @Getter
 @Setter
 @ToString
-public class QuestionDto extends AbstractDto{
+public class QuestionDto extends BaseDto {
     private String title;
     private String content;
     private String type;
