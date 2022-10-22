@@ -13,7 +13,7 @@ import java.util.List;
 public interface ExamRepository extends JpaRepository<ExamEntity, Long>{
 
     @EntityGraph(attributePaths = {"questions", "questions.answers"})
-    ExamEntity findByIdAndCodeNullAndDeletedFalse(Long id);
+    ExamEntity findDistinctByIdAndCodeNullAndDeletedFalse(Long id);
 
     //@EntityGraph(attributePaths = {"questions", "questions.answers"})
     @Query(value = "select * from exam" +

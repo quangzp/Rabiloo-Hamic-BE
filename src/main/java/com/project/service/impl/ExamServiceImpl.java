@@ -6,6 +6,7 @@ import com.project.entity.ExamEntity;
 import com.project.entity.MediaEntity;
 import com.project.entity.QuestionEntity;
 import com.project.repository.ExamRepository;
+import com.project.repository.ExamRepositoryCustom;
 import com.project.request.ExamFilterRequest;
 import com.project.request.ExamRequest;
 import com.project.response.ExamResponse;
@@ -36,6 +37,9 @@ public class ExamServiceImpl implements ExamService {
 
     @Autowired
     private ExamRepository repository;
+
+    @Autowired
+    private ExamRepositoryCustom repositoryCustom;
 
     private QuestionService questionService;
 
@@ -81,7 +85,7 @@ public class ExamServiceImpl implements ExamService {
         if (entities.isEmpty()) {
             response.setMessage("exam not found");
             response.setStatusCode(HttpStatus.OK);
-        }else {
+        } else {
             List<ExamDto> dtos = new ArrayList<>();
             entities.forEach(e -> dtos.add(toDto(e)));
 
@@ -95,13 +99,19 @@ public class ExamServiceImpl implements ExamService {
 
     @Override
     public ExamResponse findOne(Long id) {
-        ExamEntity entity = repository.findByIdAndDeletedFalse(id);
+        ExamEntity exam = null;
+        try {
+            exam = repositoryCustom.findExamById(id);
+        } catch (Exception e) {
+            log.info(e.getMessage());
+        }
+
         ExamResponse response = new ExamResponse();
-        if (entity == null) {
+        if (exam == null) {
             response.setMessage("exam not found");
             response.setStatusCode(HttpStatus.OK);
-        }else {
-            ExamDto dto = mapper.map(entity, ExamDto.class);
+        } else {
+            ExamDto dto = mapper.map(exam, ExamDto.class);
 
             response.setDto(dto);
             response.setMessage("OK");
@@ -115,14 +125,14 @@ public class ExamServiceImpl implements ExamService {
     @Override
     public ExamResponse create(ExamRequest req) {
         ExamResponse response = new ExamResponse();
-        try{
+        try {
             ExamEntity entity = repository.save(mapper.map(req, ExamEntity.class));
             ExamDto dto = mapper.map(entity, ExamDto.class);
 
             response.setDto(dto);
             response.setMessage("OK");
             response.setStatusCode(HttpStatus.OK);
-        }catch (Exception e){
+        } catch (Exception e) {
             response.setMessage("ERROR");
             response.setStatusCode(HttpStatus.BAD_REQUEST);
         }
@@ -137,7 +147,7 @@ public class ExamServiceImpl implements ExamService {
         if (!repository.existsById(req.getId())) {
             response.setMessage("Not found exam");
             response.setStatusCode(HttpStatus.NOT_FOUND);
-        }else {
+        } else {
             ExamEntity entity = repository.save(mapper.map(req, ExamEntity.class));
             ExamDto dto = mapper.map(entity, ExamDto.class);
 
@@ -170,8 +180,14 @@ public class ExamServiceImpl implements ExamService {
         return response;
     }
 
-    public Optional<ExamEntity> findById(Long id) {
-        return repository.findById(id);
+    public ExamEntity findById(Long id) {
+
+        Optional<ExamEntity> examOptional = repository.findById(id);
+        if(examOptional.isPresent()){
+            return examOptional.get();
+        }
+
+        return null;
     }
 
     @Override
@@ -210,13 +226,19 @@ public class ExamServiceImpl implements ExamService {
 		}
 
 		exam.setQuestions(questions);*/
-        ExamEntity exam = repository.findByIdAndCodeNullAndDeletedFalse(id);
+        ExamEntity exam = null;
+
+        try {
+            exam = repositoryCustom.findExamByIdAndCodeNull(id);
+        } catch (Exception e) {
+            log.info(e.getMessage());
+        }
 
         ExamResponse response = new ExamResponse();
-        if(exam == null){
+        if (exam == null) {
             response.setMessage("exam not found");
             response.setStatusCode(HttpStatus.NOT_FOUND);
-        }else {
+        } else {
             response.setDto(mapper.map(exam, ExamDto.class));
             response.setMessage("OK");
             response.setStatusCode(HttpStatus.OK);
@@ -232,17 +254,17 @@ public class ExamServiceImpl implements ExamService {
             code = "%" + request.getCode() + "%";
 
         String title = request.getTitle();
-        if (title!= null)
+        if (title != null)
             title = "%" + request.getTitle() + "%";
 
         List<ExamEntity> entities = repository.findExamsByParamNative(code, title,
                 request.getStart(), request.getEnd());
 
         ExamResponse response = new ExamResponse();
-        if(entities.isEmpty()){
+        if (entities.isEmpty()) {
             response.setMessage("Exams not found");
             response.setStatusCode(HttpStatus.NOT_FOUND);
-        }else {
+        } else {
             List<ExamDto> dtos = new ArrayList<>();
             entities.forEach(e -> dtos.add(mapper.map(e, ExamDto.class)));
             response.setDtos(dtos);
@@ -257,7 +279,7 @@ public class ExamServiceImpl implements ExamService {
         List<ExamEntity> entities = repository.findByCodeNullAndDeletedFalse();
 
         List<ExamDto> dtos = new ArrayList<>();
-        entities.forEach(e-> dtos.add(toDto(e)));
+        entities.forEach(e -> dtos.add(toDto(e)));
         ExamResponse response = new ExamResponse();
         response.setDtos(dtos);
         response.setMessage("Ok");
@@ -269,7 +291,7 @@ public class ExamServiceImpl implements ExamService {
     public ByteArrayInputStream genExamExcelFile(Long examId) {
         ExamEntity exam = repository.findByIdAndDeletedFalse(examId);
 
-        if(exam == null) {
+        if (exam == null) {
             return null;
         }
 
@@ -316,7 +338,7 @@ public class ExamServiceImpl implements ExamService {
     }
 
     public void printQuestion(QuestionEntity question, int questionIndex, List<Row> rows) {
-        if(question == null) {
+        if (question == null) {
             return;
         }
 
@@ -324,10 +346,10 @@ public class ExamServiceImpl implements ExamService {
         int columnIndex = 0;
         creatAndPrintCell(firstRow.createCell(columnIndex++), q -> questionIndex, question);
         for (Function<QuestionEntity, Object> questionExtractor : questionExtractors) {
-           creatAndPrintCell(firstRow.createCell(columnIndex++), questionExtractor, question);
+            creatAndPrintCell(firstRow.createCell(columnIndex++), questionExtractor, question);
         }
 
-        Set<AnswerEntity> answers = question.getAnswers();
+        List<AnswerEntity> answers = question.getAnswers();
         int ansIndex = 0;
         for (AnswerEntity answer : answers) {
             creatAndPrintCell(rows.get(ansIndex).createCell(ANSWER_COLUMN_NUMBER), AnswerEntity::getContent, answer);
@@ -345,36 +367,36 @@ public class ExamServiceImpl implements ExamService {
 
     public <T, R> void creatAndPrintCell(Cell cell, Function<T, R> extractor, T t) {
         R r = extractor.apply(t);
-        if(r == null) {
+        if (r == null) {
             cell.setCellValue(" ");
         }
 
-        if(r instanceof Double) {
+        if (r instanceof Double) {
             cell.setCellValue((double) r);
             return;
         }
 
-        if(r instanceof Long) {
+        if (r instanceof Long) {
             cell.setCellValue((long) r);
             return;
         }
 
-        if(r instanceof Integer) {
+        if (r instanceof Integer) {
             cell.setCellValue((int) r);
             return;
         }
 
-        if(r instanceof String) {
+        if (r instanceof String) {
             cell.setCellValue((String) r);
             return;
         }
 
-        if(r instanceof Date) {
+        if (r instanceof Date) {
             cell.setCellValue((Date) r);
         }
     }
 
-    ExamDto toDto(ExamEntity entity){
+    ExamDto toDto(ExamEntity entity) {
         ExamDto dto = new ExamDto();
 
         dto.setId(entity.getId());

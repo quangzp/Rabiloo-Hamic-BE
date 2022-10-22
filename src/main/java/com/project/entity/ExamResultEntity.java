@@ -20,6 +20,9 @@ public class ExamResultEntity extends  BaseEntity{
     @Column
     private Date end_time;
 
+    @Column(name = "is_submit")
+    private boolean isSubmit;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "exam_id")
     private ExamEntity exam;

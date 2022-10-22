@@ -16,5 +16,4 @@ public class ExamDto extends BaseDto {
     private Date startFrom;
     private Date endTo;
     private List<QuestionDto> questions;
-    private List<Long> candidateIds;
 }

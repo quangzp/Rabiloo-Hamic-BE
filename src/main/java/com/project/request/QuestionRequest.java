@@ -16,4 +16,5 @@ public class QuestionRequest {
     private Long examId;
     private Long categoryId;
     List<AnswerRequest> answers;
+    List<MediaRequest> images;
 }

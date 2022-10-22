@@ -17,7 +17,6 @@ import java.util.Set;
 @Getter
 @Setter
 @Where(clause = "deleted = false")
-//@EqualsAndHashCode(callSuper = false)
 public class QuestionEntity extends BaseEntity{
 	/**
 	 * 
@@ -36,9 +35,9 @@ public class QuestionEntity extends BaseEntity{
 	@Column
 	private Integer maxPoint;
 
-	@LazyCollection(LazyCollectionOption.TRUE)
-	@OneToMany(mappedBy = "question",cascade = CascadeType.ALL)
-	private Set<AnswerEntity> answers;
+	@LazyCollection(LazyCollectionOption.FALSE)
+	@OneToMany(mappedBy = "question",cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+	private List<AnswerEntity> answers;
 
 	@OneToMany(mappedBy = "question")
 	private Set<MediaEntity> images;

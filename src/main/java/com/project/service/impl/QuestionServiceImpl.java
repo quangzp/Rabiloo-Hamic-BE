@@ -101,10 +101,10 @@ public class QuestionServiceImpl implements QuestionService {
 	}
 
 	private QuestionResponse save(QuestionRequest req) {
-		Optional<ExamEntity> examEntityOptional = examService.findById(req.getExamId());
+		ExamEntity exam = examService.findById(req.getExamId());
 
 		QuestionResponse response = new QuestionResponse();
-		if(!examEntityOptional.isPresent()){
+		if(exam == null){
 			response.setMessage("question is not found");
 			response.setStatusCode(HttpStatus.NOT_FOUND);
 		} else {
@@ -112,7 +112,7 @@ public class QuestionServiceImpl implements QuestionService {
 			// save question
 			QuestionEntity question = mapper.map(req,QuestionEntity.class);
 			question.setMaxPoint(10);
-			question.setExam(examEntityOptional.get());
+			question.setExam(exam);
 			QuestionDto dto = mapper.map(repository.save(question),QuestionDto.class);
 
 			// delete old answers which not use

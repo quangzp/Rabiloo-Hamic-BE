@@ -1,6 +1,8 @@
 package com.project.service.impl;
 
+import com.project.config.UserAuth;
 import com.project.dto.ExamResultDto;
+import com.project.entity.ExamEntity;
 import com.project.entity.ExamResultEntity;
 import com.project.entity.UserEntity;
 import com.project.repository.ExamResultRepository;
@@ -28,6 +30,8 @@ import java.util.*;
 @Slf4j
 public class ExamResultServiceImpl implements ExamResultService {
 
+    @Autowired
+    private UserAuth userAuth;
     @Autowired
     private ExamResultRepository repository;
 
@@ -91,9 +95,17 @@ public class ExamResultServiceImpl implements ExamResultService {
         String uuid = UUID.randomUUID().toString();
         req.setUuid(uuid);
 
-        /*if(selfSubmit(req) == null){
+        ExamResultEntity examResult = new ExamResultEntity();
 
-        }*/
+        ExamEntity exam = examService.findById(req.getExamId());
+
+
+        UserEntity user = userAuth.getCurrent();
+        if (user != null){
+            examResult.setUser(user);
+        }
+
+        //examResult.setExam();
         return null;
     }
 

@@ -1,18 +1,16 @@
 package com.project.service.impl;
 
+import com.project.config.UserAuth;
 import com.project.dto.UserDto;
 import com.project.entity.RoleEntity;
 import com.project.entity.UserEntity;
 import com.project.repository.UserRepository;
 import com.project.request.UserRequest;
 import com.project.response.UserResponse;
-import com.project.security.CustomUserDetail;
 import com.project.service.UserService;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -22,85 +20,88 @@ import java.util.List;
 import java.util.Optional;
 
 @Service
-public class UserServiceImpl implements UserService{
+public class UserServiceImpl implements UserService {
+    @Autowired
+    private UserAuth userAuth;
 
-	@Autowired
-	private UserRepository repository;
+    @Autowired
+    private UserRepository repository;
 
-	@Autowired
-	private ModelMapper mapper;
+    @Autowired
+    private ModelMapper mapper;
 
-	@Autowired
-	private PasswordEncoder passwordEncoder;
-	
-	@Override
-	public UserResponse findAll() {;
-		List<UserEntity> entities = repository.findAll();
+    @Autowired
+    private PasswordEncoder passwordEncoder;
 
-		UserResponse response = new UserResponse();
-		if(entities.isEmpty()){
-			response.setMessage("answers is null");
-			response.setStatusCode(HttpStatus.NOT_FOUND);
-		}else {
-			List<UserDto> dtos = new ArrayList<>();
-			entities.forEach(e -> dtos.add(mapper.map(e, UserDto.class)));
+    @Override
+    public UserResponse findAll() {
+        ;
+        List<UserEntity> entities = repository.findAll();
 
-			response.setDtos(dtos);
-			response.setMessage("OK");
-			response.setStatusCode(HttpStatus.OK);
-		}
+        UserResponse response = new UserResponse();
+        if (entities.isEmpty()) {
+            response.setMessage("answers is null");
+            response.setStatusCode(HttpStatus.NOT_FOUND);
+        } else {
+            List<UserDto> dtos = new ArrayList<>();
+            entities.forEach(e -> dtos.add(mapper.map(e, UserDto.class)));
+
+            response.setDtos(dtos);
+            response.setMessage("OK");
+            response.setStatusCode(HttpStatus.OK);
+        }
 
 
-		return response;
-	}
+        return response;
+    }
 
-	@Override
-	public UserResponse findOne(Long id) {
-		Optional<UserEntity> questionEntityOptional = repository.findById(id);
+    @Override
+    public UserResponse findOne(Long id) {
+        Optional<UserEntity> questionEntityOptional = repository.findById(id);
 
-		UserResponse response = new UserResponse();
+        UserResponse response = new UserResponse();
 
-		if(!questionEntityOptional.isPresent()){
-			response.setMessage("answer not found");
-			response.setStatusCode(HttpStatus.NOT_FOUND);
-		}else {
-			UserDto dto = mapper.map(questionEntityOptional.get(),UserDto.class);
-			response.setDto(dto);
-			response.setMessage("ok");
-			response.setStatusCode(HttpStatus.OK);
-		}
+        if (!questionEntityOptional.isPresent()) {
+            response.setMessage("answer not found");
+            response.setStatusCode(HttpStatus.NOT_FOUND);
+        } else {
+            UserDto dto = mapper.map(questionEntityOptional.get(), UserDto.class);
+            response.setDto(dto);
+            response.setMessage("ok");
+            response.setStatusCode(HttpStatus.OK);
+        }
 
-		return response;
-	}
+        return response;
+    }
 
-	@Override
-	public UserResponse create(UserRequest req) {
-		UserEntity user;
+    @Override
+    public UserResponse create(UserRequest req) {
+        UserEntity user;
 
-		user = repository.findByUserName(req.getUserName());
+        user = repository.findByUserName(req.getUserName());
 
-		UserResponse response = new UserResponse();
-		if(user != null){
-			response.setMessage("User name is exits");
-			response.setStatusCode(HttpStatus.BAD_REQUEST);
-		}
+        UserResponse response = new UserResponse();
+        if (user != null) {
+            response.setMessage("User name is exits");
+            response.setStatusCode(HttpStatus.BAD_REQUEST);
+        }
 
-		user = mapper.map(req,UserEntity.class);
-		RoleEntity urole = new RoleEntity("ROLE_USER");
-		user.addRole(urole);
-		user.setPassword(passwordEncoder.encode(req.getPassword()));
+        user = mapper.map(req, UserEntity.class);
+        RoleEntity urole = new RoleEntity("ROLE_USER");
+        user.addRole(urole);
+        user.setPassword(passwordEncoder.encode(req.getPassword()));
 
-		UserDto dto = mapper.map(repository.save(user),UserDto.class);
+        UserDto dto = mapper.map(repository.save(user), UserDto.class);
 
-		response.setDto(dto);
-		response.setMessage("ok");
-		response.setStatusCode(HttpStatus.OK);
+        response.setDto(dto);
+        response.setMessage("ok");
+        response.setStatusCode(HttpStatus.OK);
 
-		return response;
-	}
+        return response;
+    }
 
-	@Override
-	public UserResponse update(UserRequest req) {
+    @Override
+    public UserResponse update(UserRequest req) {
 		/*UserEntity user;
 		user = repository.findByUserName(req.getUserName());
 		if (user == null){
@@ -112,89 +113,87 @@ public class UserServiceImpl implements UserService{
 		UserDto dto = mapper.map(repository.save(user),UserDto.class);
 		dto.setPassword(req.getPassword());
 		return new ResponseEntity<>(dto,HttpStatus.OK);*/
-		return null;
-	}
+        return null;
+    }
 
 
-	@Override
-	public UserResponse delete(Long id) {
-		Optional<UserEntity> optional = repository.findById(id);
+    @Override
+    public UserResponse delete(Long id) {
+        Optional<UserEntity> optional = repository.findById(id);
 
-		UserResponse response = new UserResponse();
-		if (!optional.isPresent()) {
-			response.setMessage("Answer is not found");
-			response.setStatusCode(HttpStatus.NOT_FOUND);
-		} else {
-			UserEntity entity = optional.get();
-			entity.setDeleted(true);
-			entity.setActive(0);
-			UserDto dto = mapper.map(repository.save(entity), UserDto.class);
+        UserResponse response = new UserResponse();
+        if (!optional.isPresent()) {
+            response.setMessage("Answer is not found");
+            response.setStatusCode(HttpStatus.NOT_FOUND);
+        } else {
+            UserEntity entity = optional.get();
+            entity.setDeleted(true);
+            entity.setActive(0);
+            UserDto dto = mapper.map(repository.save(entity), UserDto.class);
 
-			response.setMessage("OK");
-			response.setStatusCode(HttpStatus.OK);
-		}
+            response.setMessage("OK");
+            response.setStatusCode(HttpStatus.OK);
+        }
 
-		return response;
-	}
+        return response;
+    }
 
-	@Override
-	public Optional<UserEntity> findById(Long id) {
-		return repository.findById(id);
-	}
+    @Override
+    public Optional<UserEntity> findById(Long id) {
+        return repository.findById(id);
+    }
 
-	@Override
-	public UserEntity findByUserName(String userName) {
-		return repository.findByUserName(userName);
-	}
+    @Override
+    public UserEntity findByUserName(String userName) {
+        return repository.findByUserName(userName);
+    }
 
-	@Override
-	public UserResponse updateUserInfo(UserRequest request) {
+    @Override
+    public UserResponse updateUserInfo(UserRequest request) {
 
-		UserResponse response = new UserResponse();
-		if(request.getId() == null) {
-			response.setMessage("User is not found");
-			response.setStatusCode(HttpStatus.NOT_FOUND);
-			return response;
-		}
+        UserResponse response = new UserResponse();
+        if (request.getId() == null) {
+            response.setMessage("User is not found");
+            response.setStatusCode(HttpStatus.NOT_FOUND);
+            return response;
+        }
 
-		Optional<UserEntity> userOptional = repository.findById(request.getId());
+        Optional<UserEntity> userOptional = repository.findById(request.getId());
 
-		if(!userOptional.isPresent()) {
-			response.setMessage("User is not found");
-			response.setStatusCode(HttpStatus.NOT_FOUND);
-			return response;
-		}
+        if (!userOptional.isPresent()) {
+            response.setMessage("User is not found");
+            response.setStatusCode(HttpStatus.NOT_FOUND);
+            return response;
+        }
 
-		UserEntity user = userOptional.get();
-		user.setFirstName(request.getFirstName());
-		user.setLastName(request.getLastName());
-		user.setGender(request.getGender());
-		user.setBirthDay(new Date(request.getBirthDay()));
-		user.setModifiedDate(new Date());
-		user.setModifiedBy(user.getId());
+        UserEntity user = userOptional.get();
+        user.setFirstName(request.getFirstName());
+        user.setLastName(request.getLastName());
+        user.setGender(request.getGender());
+        user.setBirthDay(new Date(request.getBirthDay()));
+        user.setModifiedDate(new Date());
+        user.setModifiedBy(user.getId());
 
-		response.setDto(mapper.map(repository.save(user),UserDto.class));
-		response.setMessage("OK");
-		response.setStatusCode(HttpStatus.OK);
-		return response;
-	}
+        response.setDto(mapper.map(repository.save(user), UserDto.class));
+        response.setMessage("OK");
+        response.setStatusCode(HttpStatus.OK);
+        return response;
+    }
 
-	@Override
-	public UserResponse getCurrent() {
-		Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+    @Override
+    public UserResponse getCurrent() {
 
-		UserResponse response = new UserResponse();
-		if (auth != null && auth.isAuthenticated()) {
-			String userName = ((CustomUserDetail) auth.getPrincipal()).getUsername();
-			UserEntity user = repository.findByUserName(userName);
-			UserDto dto = mapper.map(repository.findByUserName(userName), UserDto.class);
-			 response.setDto(mapper.map(repository.findByUserName(userName), UserDto.class));
-			 response.setStatusCode(HttpStatus.OK);
-			 response.setMessage("OK");
-		}else {
-			response.setMessage("Not authentication");
-			response.setStatusCode(HttpStatus.UNAUTHORIZED);
-		}
-		return response;
-	}
+        UserEntity user = userAuth.getCurrent();
+
+        UserResponse response = new UserResponse();
+        if (user != null) {
+            response.setDto(mapper.map(user, UserDto.class));
+            response.setStatusCode(HttpStatus.OK);
+            response.setMessage("OK");
+        } else {
+            response.setMessage("Not authentication");
+            response.setStatusCode(HttpStatus.UNAUTHORIZED);
+        }
+        return response;
+    }
 }
