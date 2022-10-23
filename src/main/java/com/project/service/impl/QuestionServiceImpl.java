@@ -1,7 +1,6 @@
 package com.project.service.impl;
 
 import com.project.dto.AnswerDto;
-import com.project.dto.MediaDto;
 import com.project.dto.QuestionDto;
 import com.project.entity.AnswerEntity;
 import com.project.entity.ExamEntity;
@@ -137,18 +136,22 @@ public class QuestionServiceImpl implements QuestionService {
 
 			//set deleted = true for old medias
 			List<MediaEntity> oldMedias = mediaService.findByQuestionId(req.getId());
-			mediaService.deleteAll(oldMedias);
-
-			//set new medias
-			List<MediaEntity> newMedias = new ArrayList<>();
-			List<MediaRequest> mediaRequests = req.getImages();
-			for (MediaRequest mediaRequest : mediaRequests) {
-				MediaEntity newMedia = mapper.map(mediaRequest,MediaEntity.class);
-				newMedia.setQuestion(question);
-				newMedias.add(newMedia);
+			if(oldMedias != null){
+				mediaService.deleteAll(oldMedias);
 			}
 
-			questionDto.setImages(mediaService.saveAll(newMedias));
+			//set new medias
+			List<MediaRequest> mediaRequests = req.getImages();
+			if(mediaRequests != null){
+				List<MediaEntity> newMedias = new ArrayList<>();
+				for (MediaRequest mediaRequest : mediaRequests) {
+					MediaEntity newMedia = mapper.map(mediaRequest,MediaEntity.class);
+					newMedia.setQuestion(question);
+					newMedias.add(newMedia);
+				}
+				questionDto.setImages(mediaService.saveAll(newMedias));
+			}
+
 
 			response.setDto(questionDto);
 			response.setMessage("OK");
@@ -187,6 +190,11 @@ public class QuestionServiceImpl implements QuestionService {
 	@Override
 	public List<QuestionEntity> findByExam(ExamEntity exam) {
 		return repository.findByExamAndDeletedFalse(exam);
+	}
+
+	@Override
+	public void saveAll(List<QuestionEntity> questions) {
+		
 	}
 
 }

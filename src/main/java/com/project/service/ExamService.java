@@ -23,7 +23,7 @@ public interface ExamService extends BaseService<ExamResponse, ExamRequest> {
 
     ByteArrayInputStream genExamExcelFile(Long examId);
 
-    void createExcelFileFromExam(MultipartFile file) throws IOException;
+    void createExamFromExcelFile(Long examId,MultipartFile file) throws IOException;
 
     ExamEntity findAllInfoExamById(Long examId);
 }

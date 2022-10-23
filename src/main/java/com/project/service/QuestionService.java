@@ -12,4 +12,6 @@ public interface QuestionService extends BaseService<QuestionResponse,QuestionRe
     Optional<QuestionEntity> findById(Long id);
 
     List<QuestionEntity> findByExam(ExamEntity exam);
+
+    void saveAll(List<QuestionEntity> questions);
 }

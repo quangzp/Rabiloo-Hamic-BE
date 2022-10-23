@@ -18,7 +18,11 @@ public class UserAuth {
 
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
-        if (authentication == null || !authentication.isAuthenticated()) {
+        System.out.println();
+        if (authentication.getAuthorities().stream().findFirst().get().getAuthority().equals("ROLE_ANONYMOUS")
+                || authentication == null
+                || !authentication.isAuthenticated())
+        {
             return null;
         }
 

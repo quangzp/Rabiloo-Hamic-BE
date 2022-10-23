@@ -8,5 +8,5 @@ import java.util.List;
 
 @Repository
 public interface MediaRepository extends JpaRepository<MediaEntity, Long>{
-    List<MediaEntity> findByQuestionAndDeletedFalse(Long questionId);
+    List<MediaEntity> findByQuestion_IdAndDeletedFalse(Long questionId);
 }

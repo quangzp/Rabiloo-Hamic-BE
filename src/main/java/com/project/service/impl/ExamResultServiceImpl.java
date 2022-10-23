@@ -376,6 +376,11 @@ public class ExamResultServiceImpl implements ExamResultService {
         return response;
     }
 
+    @Override
+    public ExamResultResponse findExamResultsByUser() {
+        return null;
+    }
+
     private UserEntity selfSubmit(ExamResultEntity examResultEntity) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 

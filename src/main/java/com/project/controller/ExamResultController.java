@@ -15,9 +15,9 @@ public class ExamResultController {
 
     //TODO create api start exam:
     // + save start time
-    @GetMapping("/public/exam-list")
-    public ExamResultResponse getExamByUser() {
-        return new ExamResultResponse();
+    @GetMapping("/user/exam-history")
+    public ExamResultResponse getExamsHistory() {
+        return service.findExamResultsByUser();
     }
 
     @PostMapping("/public/exam-start")

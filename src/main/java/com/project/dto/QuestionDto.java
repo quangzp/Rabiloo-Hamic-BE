@@ -13,6 +13,7 @@ import java.util.List;
 public class QuestionDto extends BaseDto {
     private String title;
     private String content;
+    private Integer level;
     private String type;
     private Integer maxPoint;
     private Date timeAnswer;

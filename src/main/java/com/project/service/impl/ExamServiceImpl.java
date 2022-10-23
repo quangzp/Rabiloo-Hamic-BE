@@ -58,14 +58,24 @@ public class ExamServiceImpl implements ExamService {
     @Autowired
     private ModelMapper mapper;
 
+    private CellStyle createBorderCellStyle(Workbook workbook) {
+        CellStyle style = workbook.createCellStyle();
+        style.setBorderBottom(BorderStyle.THIN);
+        style.setBorderTop(BorderStyle.THIN);
+        style.setBorderRight(BorderStyle.THIN);
+        style.setBorderLeft(BorderStyle.THIN);
+
+        return style;
+    }
+
     private CellStyle createHeaderCellStyle(Workbook workbook) {
         CellStyle style = workbook.createCellStyle();
         Font font = workbook.createFont();
         font.setBold(true);
         style.setAlignment(HorizontalAlignment.CENTER);
         style.setVerticalAlignment(VerticalAlignment.CENTER);
-        style.setFillBackgroundColor(IndexedColors.BLUE1.index);
-        style.setFillPattern(FillPatternType.SOLID_FOREGROUND);
+        style.setFillBackgroundColor(IndexedColors.LIGHT_BLUE.index);
+        //style.setFillPattern(FillPatternType.SOLID_FOREGROUND);
         style.setWrapText(true);
 
         return style;
@@ -83,7 +93,7 @@ public class ExamServiceImpl implements ExamService {
             "Nội dung",
             "Cấp độ",
             "Thang điểm",
-            "Loại câu hỏi (1 - chọn đáp án, 2 - chọn nhiều đ/a, 3 - điền text)",
+            "Loại câu hỏi",
             "Lĩnh vực",
             "Câu trả lời",
             "Đáp án",
@@ -162,7 +172,7 @@ public class ExamServiceImpl implements ExamService {
                     .collect(Collectors.toList());
             questionDto.setImages(imageDtos);
             questionDto.setAnswers(answerDtos);
-
+            questionDto.setLevel(question.getLevel());
             questionDtos.add(questionDto);
         }
         examDto.setQuestions(questionDtos);
@@ -287,12 +297,46 @@ public class ExamServiceImpl implements ExamService {
             response.setMessage("exam not found");
             response.setStatusCode(HttpStatus.NOT_FOUND);
         } else {
-            response.setDto(mapper.map(exam, ExamDto.class));
+            ExamDto examDto = examToExamDto(exam);
+
+            examDto.setQuestions(randomQuestion(examDto.getQuestions()));
+
+            response.setDto(examDto);
             response.setMessage("OK");
             response.setStatusCode(HttpStatus.OK);
         }
 
         return response;
+    }
+
+    private List<QuestionDto> randomQuestion(List<QuestionDto> questions) {
+        questions.forEach(q -> {
+            if(q.getLevel() == null) {
+                q.setLevel(1);
+            }
+        });
+
+        List<QuestionDto> quesLv1 = getQuestionByLevel(questions, 1);
+        List<QuestionDto> quesLv2 = getQuestionByLevel(questions, 2);
+        List<QuestionDto> quesLv3 = getQuestionByLevel(questions, 3);
+        List<QuestionDto> quesLv4 = getQuestionByLevel(questions, 4);
+
+        Collections.shuffle(quesLv1);
+        Collections.shuffle(quesLv2);
+        Collections.shuffle(quesLv3);
+        Collections.shuffle(quesLv4);
+
+        List<QuestionDto> result = new ArrayList<>();
+        result.addAll(quesLv1);
+        result.addAll(quesLv2);
+        result.addAll(quesLv3);
+        result.addAll(quesLv4);
+
+        return result;
+    }
+
+    private List<QuestionDto> getQuestionByLevel(List<QuestionDto> questions, int level) {
+        return questions.stream().filter(q -> level == q.getLevel()).collect(Collectors.toList());
     }
 
     @Override
@@ -345,8 +389,9 @@ public class ExamServiceImpl implements ExamService {
 
         try (Workbook workbook = new XSSFWorkbook(); ByteArrayOutputStream out = new ByteArrayOutputStream()) {
             Sheet sheet = workbook.createSheet("Question");
-            CellStyle cellStyle = createHeaderCellStyle(workbook);
-            printHeaders(sheet, cellStyle, HEADER_QUESTION, 0);
+            CellStyle headerCellStyle = createHeaderCellStyle(workbook);
+            CellStyle borderCellStyle = createBorderCellStyle(workbook);
+            printHeaders(sheet, headerCellStyle, HEADER_QUESTION, 0);
 
             int rowIndex = 1;
             List<QuestionEntity> questions = exam.getQuestions();
@@ -358,7 +403,7 @@ public class ExamServiceImpl implements ExamService {
                 if(rowQuantity == 0) {
                     rowQuantity++;
                 }
-                printQuestion(question, questionIndex, creatRows(sheet, rowIndex, rowQuantity));
+                printQuestion(question, borderCellStyle, questionIndex, creatRows(sheet, rowIndex, rowQuantity));
                 rowIndex += rowQuantity;
                 questionIndex++;
             }
@@ -413,35 +458,35 @@ public class ExamServiceImpl implements ExamService {
         }
     }
 
-    public void printQuestion(QuestionEntity question, int questionIndex, List<Row> rows) {
+    public void printQuestion(QuestionEntity question, CellStyle cellStyle, int questionIndex, List<Row> rows) {
         if (question == null) {
             return;
         }
 
         Row firstRow = rows.get(0);
         int columnIndex = 0;
-        creatAndPrintCell(firstRow.createCell(columnIndex++), q -> questionIndex, question);
+        creatAndPrintCell(firstRow.createCell(columnIndex++), cellStyle, q -> questionIndex, question);
         for (Function<QuestionEntity, Object> questionExtractor : questionExtractors) {
-            creatAndPrintCell(firstRow.createCell(columnIndex++), questionExtractor, question);
+            creatAndPrintCell(firstRow.createCell(columnIndex++), cellStyle, questionExtractor, question);
         }
 
         List<AnswerEntity> answers = question.getAnswers();
         int ansIndex = 0;
         for (AnswerEntity answer : answers) {
-            creatAndPrintCell(rows.get(ansIndex).createCell(ANSWER_COLUMN_NUMBER), AnswerEntity::getContent, answer);
-            creatAndPrintCell(rows.get(ansIndex).createCell(IS_RESULT_COLUMN_NUMBER), AnswerEntity::getIsResult, answer);
+            creatAndPrintCell(rows.get(ansIndex).createCell(ANSWER_COLUMN_NUMBER), cellStyle, AnswerEntity::getContent, answer);
+            creatAndPrintCell(rows.get(ansIndex).createCell(IS_RESULT_COLUMN_NUMBER), cellStyle, AnswerEntity::getIsResult, answer);
             ansIndex++;
         }
 
         List<MediaEntity> medias = question.getImages();
         int mediaIndex = 0;
         for (MediaEntity media : medias) {
-            creatAndPrintCell(rows.get(mediaIndex).createCell(MEDIA_COLUMN_NUMBER), MediaEntity::getPath, media);
+            creatAndPrintCell(rows.get(mediaIndex).createCell(MEDIA_COLUMN_NUMBER), cellStyle, MediaEntity::getPath, media);
             mediaIndex++;
         }
     }
 
-    public <T, R> void creatAndPrintCell(Cell cell, Function<T, R> extractor, T t) {
+    public <T, R> void creatAndPrintCell(Cell cell, CellStyle cellStyle, Function<T, R> extractor, T t) {
         R r = extractor.apply(t);
         if (r == null) {
             cell.setCellValue(" ");
@@ -485,7 +530,7 @@ public class ExamServiceImpl implements ExamService {
         return dto;
     }
 
-    public void createExcelFileFromExam(MultipartFile file) throws IOException {
+    public void createExamFromExcelFile(Long examId,MultipartFile file) throws IOException {
         Workbook workbook = new XSSFWorkbook(file.getInputStream());
         Sheet sheet = workbook.getSheetAt(0);
 
@@ -509,7 +554,10 @@ public class ExamServiceImpl implements ExamService {
             }
         }
 
-        System.out.println("abc");
+        ExamEntity exam = repository.findByIdAndDeletedFalse(examId);
+        //set exam for questions
+        questions.forEach(q-> q.setExam(exam));
+        questionService.saveAll(questions);
     }
 
     @Override
@@ -524,8 +572,8 @@ public class ExamServiceImpl implements ExamService {
         setContentForQuestion(question, cells.get(1));
         setMaxPointForQuestion(question, cells.get(3));
         setTypeForQuestion(question, cells.get(4));
-        List<AnswerEntity> answers = new ArrayList<>();
 
+        List<AnswerEntity> answers = new ArrayList<>();
         for (int i = 0; i < rows.size(); i++) {
             answers.add(createAnswerFromRow(rows.get(i), i));
         }

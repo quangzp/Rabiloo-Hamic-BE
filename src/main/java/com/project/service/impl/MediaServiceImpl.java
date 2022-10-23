@@ -138,7 +138,7 @@ public class MediaServiceImpl implements MediaService {
 
     @Override
     public List<MediaEntity> findByQuestionId(Long questionId) {
-        return repository.findByQuestionAndDeletedFalse(questionId);
+        return repository.findByQuestion_IdAndDeletedFalse(questionId);
     }
 
     @Override
