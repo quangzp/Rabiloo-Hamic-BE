@@ -4,13 +4,10 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.project.enums.QuestionType;
 import lombok.Getter;
 import lombok.Setter;
-import org.hibernate.annotations.LazyCollection;
-import org.hibernate.annotations.LazyCollectionOption;
 import org.hibernate.annotations.Where;
 
 import javax.persistence.*;
 import java.util.List;
-import java.util.Set;
 
 @Entity
 @Table(name = "`questions`")
@@ -35,12 +32,11 @@ public class QuestionEntity extends BaseEntity{
 	@Column
 	private Integer maxPoint;
 
-	@LazyCollection(LazyCollectionOption.FALSE)
 	@OneToMany(mappedBy = "question",cascade = CascadeType.ALL, fetch = FetchType.LAZY)
 	private List<AnswerEntity> answers;
 
 	@OneToMany(mappedBy = "question")
-	private Set<MediaEntity> images;
+	private List<MediaEntity> images;
 
 	@OneToMany(mappedBy = "question")
 	private List<QuestionResultEntity> questionResult;

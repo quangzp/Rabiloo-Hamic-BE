@@ -32,7 +32,17 @@ public interface ExamRepository extends JpaRepository<ExamEntity, Long>{
     ExamEntity findByIdAndDeletedFalse(Long id);
 
     //@EntityGraph(attributePaths = {"questions", "questions.answers"})
-    @Query(value = "select * from exam where exam.deleted = false",nativeQuery = true)
+    @Query(value = "select new ExamEntity(" +
+            "e.id," +
+            "e.title," +
+            "e.description," +
+            "e.type," +
+            "e.code," +
+            "e.startFrom," +
+            "e.endTo" +
+            ") " +
+            "from ExamEntity e " +
+            "where e.deleted = false")
     List<ExamEntity> findByDeletedFalse();
 
 

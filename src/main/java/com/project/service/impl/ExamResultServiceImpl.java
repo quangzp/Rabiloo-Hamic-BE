@@ -243,8 +243,10 @@ public class ExamResultServiceImpl implements ExamResultService {
                 .stream()
                 .map(req -> createQuestResult(req, mapQuesById))
                 .collect(Collectors.toList());
-        questionResults.forEach(q -> {q.setExamResult(examResult);
-                                        q.setUuidExam(examResult.getUuid());});
+        questionResults.forEach(q -> {
+            q.setExamResult(examResult);
+            q.setUuidExam(examResult.getUuid());
+        });
 
         int pointsResult = questionResults.stream().mapToInt(QuestionResultEntity::getPoint).sum();
         examResult.setPoints(pointsResult);

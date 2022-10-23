@@ -9,7 +9,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 
-public interface ExamService extends BaseService<ExamResponse,ExamRequest>{
+public interface ExamService extends BaseService<ExamResponse, ExamRequest> {
 
     ExamEntity findById(Long examId);
 

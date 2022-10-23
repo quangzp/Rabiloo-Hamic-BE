@@ -1,16 +1,20 @@
 package com.project.service.impl;
 
 import com.project.dto.AnswerDto;
+import com.project.dto.MediaDto;
 import com.project.dto.QuestionDto;
 import com.project.entity.AnswerEntity;
 import com.project.entity.ExamEntity;
+import com.project.entity.MediaEntity;
 import com.project.entity.QuestionEntity;
 import com.project.repository.QuestionRepository;
 import com.project.request.AnswerRequest;
+import com.project.request.MediaRequest;
 import com.project.request.QuestionRequest;
 import com.project.response.QuestionResponse;
 import com.project.service.AnswerService;
 import com.project.service.ExamService;
+import com.project.service.MediaService;
 import com.project.service.QuestionService;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
@@ -33,11 +37,15 @@ public class QuestionServiceImpl implements QuestionService {
 
 	private AnswerService answerService;
 
+	private MediaService mediaService;
+
 	@Autowired
 	public QuestionServiceImpl(@Lazy ExamService examService,
-							   @Lazy AnswerService answerService) {
+							   @Lazy AnswerService answerService,
+							   @Lazy MediaService mediaService) {
 		this.examService = examService;
 		this.answerService = answerService;
+		this.mediaService = mediaService;
 	}
 
 	@Autowired
@@ -113,7 +121,7 @@ public class QuestionServiceImpl implements QuestionService {
 			QuestionEntity question = mapper.map(req,QuestionEntity.class);
 			question.setMaxPoint(10);
 			question.setExam(exam);
-			QuestionDto dto = mapper.map(repository.save(question),QuestionDto.class);
+			QuestionDto questionDto = mapper.map(repository.save(question),QuestionDto.class);
 
 			// delete old answers which not use
 			Set<Long> nonDeleteAnswer = req.getAnswers().stream().map(AnswerRequest::getId)
@@ -123,15 +131,26 @@ public class QuestionServiceImpl implements QuestionService {
 			answers.forEach(ans -> ans.setDeleted(true));
 			answerService.saveAllToDB(answers);
 
-			//delete old media
-
-
-
 			// save new answers
 			List<AnswerDto> answerDtos = answerService.saveAll(question,req.getAnswers());
-			dto.setAnswers(answerDtos);
+			questionDto.setAnswers(answerDtos);
 
-			response.setDto(dto);
+			//set deleted = true for old medias
+			List<MediaEntity> oldMedias = mediaService.findByQuestionId(req.getId());
+			mediaService.deleteAll(oldMedias);
+
+			//set new medias
+			List<MediaEntity> newMedias = new ArrayList<>();
+			List<MediaRequest> mediaRequests = req.getImages();
+			for (MediaRequest mediaRequest : mediaRequests) {
+				MediaEntity newMedia = mapper.map(mediaRequest,MediaEntity.class);
+				newMedia.setQuestion(question);
+				newMedias.add(newMedia);
+			}
+
+			questionDto.setImages(mediaService.saveAll(newMedias));
+
+			response.setDto(questionDto);
 			response.setMessage("OK");
 			response.setStatusCode(HttpStatus.OK);
 		}
@@ -169,4 +188,5 @@ public class QuestionServiceImpl implements QuestionService {
 	public List<QuestionEntity> findByExam(ExamEntity exam) {
 		return repository.findByExamAndDeletedFalse(exam);
 	}
+
 }

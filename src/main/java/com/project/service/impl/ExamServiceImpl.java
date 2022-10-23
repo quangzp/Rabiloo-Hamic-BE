@@ -1,7 +1,10 @@
 package com.project.service.impl;
 
 import com.google.common.collect.Lists;
+import com.project.dto.AnswerDto;
 import com.project.dto.ExamDto;
+import com.project.dto.MediaDto;
+import com.project.dto.QuestionDto;
 import com.project.entity.AnswerEntity;
 import com.project.entity.ExamEntity;
 import com.project.entity.MediaEntity;
@@ -33,6 +36,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.*;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
 @Service
 @Slf4j
@@ -114,7 +118,7 @@ public class ExamServiceImpl implements ExamService {
             response.setMessage("exam not found");
             response.setStatusCode(HttpStatus.OK);
         } else {
-            ExamDto dto = mapper.map(exam, ExamDto.class);
+            ExamDto dto = examToExamDto(exam);
 
             response.setDto(dto);
             response.setMessage("OK");
@@ -123,6 +127,30 @@ public class ExamServiceImpl implements ExamService {
 
 
         return response;
+    }
+
+    private ExamDto examToExamDto(ExamEntity exam) {
+        ExamDto examDto = mapper.map(exam, ExamDto.class);
+        List<QuestionEntity> questions = exam.getQuestions();
+        List<QuestionDto> questionDtos = new ArrayList<>();
+        for (QuestionEntity question : questions) {
+            QuestionDto questionDto = mapper.map(question, QuestionDto.class);
+            List<MediaEntity> images = question.getImages();
+            List<MediaDto> imageDtos = images.stream()
+                    .map(img -> mapper.map(img, MediaDto.class))
+                    .collect(Collectors.toList());
+            List<AnswerEntity> answers = question.getAnswers();
+            List<AnswerDto> answerDtos = answers.stream()
+                    .map(ans -> mapper.map(ans, AnswerDto.class))
+                    .collect(Collectors.toList());
+            questionDto.setImages(imageDtos);
+            questionDto.setAnswers(answerDtos);
+
+            questionDtos.add(questionDto);
+        }
+        examDto.setQuestions(questionDtos);
+
+        return examDto;
     }
 
     @Override
@@ -185,9 +213,9 @@ public class ExamServiceImpl implements ExamService {
 
     public ExamEntity findById(Long id) {
 
-        Optional<ExamEntity> examOptional = repository.findById(id);
-        if(examOptional.isPresent()){
-            return examOptional.get();
+        ExamEntity exam = repositoryCustom.findExamById(id);
+        if (exam != null) {
+            return exam;
         }
 
         return null;
@@ -360,7 +388,7 @@ public class ExamServiceImpl implements ExamService {
             ansIndex++;
         }
 
-        Set<MediaEntity> medias = question.getImages();
+        List<MediaEntity> medias = question.getImages();
         int mediaIndex = 0;
         for (MediaEntity media : medias) {
             creatAndPrintCell(rows.get(mediaIndex).createCell(MEDIA_COLUMN_NUMBER), MediaEntity::getPath, media);

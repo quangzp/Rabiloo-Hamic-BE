@@ -2,6 +2,7 @@ package com.project.entity;
 
 import lombok.Getter;
 import lombok.Setter;
+import org.hibernate.annotations.Where;
 
 import javax.persistence.*;
 
@@ -9,8 +10,8 @@ import javax.persistence.*;
 @Table(name = "`media`")
 @Getter
 @Setter
+@Where(clause = "deleted = false")
 public class MediaEntity extends BaseEntity{
-    @Column
     private String path;
     @Column
     private String type; // image or video

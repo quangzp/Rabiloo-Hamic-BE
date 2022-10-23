@@ -16,16 +16,17 @@ public class ExamResultController {
     //TODO create api start exam:
     // + save start time
     @GetMapping("/public/exam-list")
-    public ExamResultResponse getExamByUser(){
+    public ExamResultResponse getExamByUser() {
         return new ExamResultResponse();
     }
+
     @PostMapping("/public/exam-start")
-    public ExamResultResponse startExam(@RequestBody ExamResultRequest req){
+    public ExamResultResponse startExam(@RequestBody ExamResultRequest req) {
         return service.create(req);
     }
 
     @PutMapping("/public/exam-submit")
-    public ExamResultResponse submitExam(@RequestBody ExamResultRequest req){
+    public ExamResultResponse submitExam(@RequestBody ExamResultRequest req) {
         return service.submit(req);
     }
 
@@ -33,7 +34,7 @@ public class ExamResultController {
     //TODO create api filter exam result
     // filter by exam id, `points in range`, ...
     @PostMapping("/public/exam-result-filter")
-    public ExamResultResponse getExamsResultByParamRequest(@RequestBody ExamResultFilterRequest req){
+    public ExamResultResponse getExamsResultByParamRequest(@RequestBody ExamResultFilterRequest req) {
         return service.findExamsByParamNative(req);
     }
 }

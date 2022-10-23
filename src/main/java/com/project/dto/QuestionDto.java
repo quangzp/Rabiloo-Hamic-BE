@@ -18,4 +18,5 @@ public class QuestionDto extends BaseDto {
     private Date timeAnswer;
     private Long examId;
     private List<AnswerDto> answers;
+    private List<MediaDto> images;
 }
