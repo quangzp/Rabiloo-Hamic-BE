@@ -123,6 +123,9 @@ public class QuestionServiceImpl implements QuestionService {
 			answers.forEach(ans -> ans.setDeleted(true));
 			answerService.saveAllToDB(answers);
 
+			//delete old media
+
+
 
 			// save new answers
 			List<AnswerDto> answerDtos = answerService.saveAll(question,req.getAnswers());

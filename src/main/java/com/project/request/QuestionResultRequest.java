@@ -15,5 +15,5 @@ public class QuestionResultRequest {
     private Long userId;
     private Long examId;
     private Long examResultId;
-    private List<Long> answerId;
+    private List<Long> answerIds;
 }

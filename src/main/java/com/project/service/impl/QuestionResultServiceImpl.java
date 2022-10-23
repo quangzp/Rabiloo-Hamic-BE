@@ -18,6 +18,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
@@ -207,11 +208,11 @@ public class QuestionResultServiceImpl implements QuestionResultService {
 
             // check type of question: Select
             if (req.getType().equals(QuestionType.SELECT) || req.getType().equals(QuestionType.MULTIPLE_SELECT)) {
-                if (req.getAnswerId() == null) {
+                if (req.getAnswerIds() == null) {
                     throw new RuntimeException("answers null");
                 }
 
-                List<AnswerEntity> answers = answerService.findAllById(req.getAnswerId());
+                List<AnswerEntity> answers = answerService.findAllById(req.getAnswerIds());
                 if (answers.isEmpty()) {
                     throw new RuntimeException("answer not found");
                 }
@@ -237,6 +238,16 @@ public class QuestionResultServiceImpl implements QuestionResultService {
         questionResults.forEach(e -> dtos.add(mapper.map(e, QuestionResultDto.class)));
 
         return dtos;
+    }
+
+    @Override
+    public List<QuestionResultEntity> saveBatch(Collection<QuestionResultEntity> questionResults) {
+        return repository.saveAll(questionResults);
+    }
+
+    @Override
+    public void save(QuestionResultEntity questionResult) {
+        repository.save(questionResult);
     }
 
     private Integer calculatePoint(List<AnswerEntity> answers) {

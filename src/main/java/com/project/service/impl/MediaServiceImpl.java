@@ -1,5 +1,6 @@
 package com.project.service.impl;
 
+import com.project.dto.MediaDto;
 import com.project.entity.MediaEntity;
 import com.project.repository.MediaRepository;
 import com.project.request.MediaRequest;
@@ -11,6 +12,9 @@ import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.util.UUID;
 
 @Service
 public class MediaServiceImpl implements MediaService {
@@ -61,8 +65,6 @@ public class MediaServiceImpl implements MediaService {
 
 	@Override
 	public MediaResponse create(MediaRequest req) {
-
-
 		return save(req);
 	}
 
@@ -107,6 +109,24 @@ public class MediaServiceImpl implements MediaService {
 
 			response.setMessage("OK");
 			response.setStatusCode(HttpStatus.OK);
+		}
+
+		return response;
+	}
+
+	public MediaResponse createNew(MultipartFile file){
+		MediaResponse response = new MediaResponse();
+		try {
+			UUID uuid = UUID.randomUUID();
+			storageService.store(file, uuid);
+			MediaDto dto = new MediaDto();
+			dto.setPath("/upload/" + uuid + "-" + file.getOriginalFilename());
+			response.setDto(dto);
+			response.setMessage("OK");
+			response.setStatusCode(HttpStatus.OK);
+		} catch (Exception e) {
+			response.setMessage("Error + " + e.getMessage());
+			response.setStatusCode(HttpStatus.BAD_REQUEST);
 		}
 
 		return response;

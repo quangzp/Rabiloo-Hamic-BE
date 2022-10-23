@@ -14,6 +14,8 @@ public interface AnswerService extends BaseService<AnswerResponse, AnswerRequest
 
     List<AnswerEntity> findByQuestionIn(List<QuestionEntity> questions);
 
+ /*   List<AnswerEntity> findByQuestionIdIn(List<Long> questionIds);*/
+
     Optional<AnswerEntity> findById(Long id);
 
     List<AnswerEntity> findAllById(List<Long> ids);

@@ -2,19 +2,16 @@ package com.project.service.impl;
 
 import com.project.config.UserAuth;
 import com.project.dto.ExamResultDto;
-import com.project.entity.ExamEntity;
-import com.project.entity.ExamResultEntity;
-import com.project.entity.UserEntity;
+import com.project.dto.QuestionResultDto;
+import com.project.entity.*;
+import com.project.enums.QuestionType;
 import com.project.repository.ExamResultRepository;
 import com.project.request.ExamResultFilterRequest;
 import com.project.request.ExamResultRequest;
-import com.project.request.submit_exam.SubmitExamRequest;
+import com.project.request.QuestionResultRequest;
 import com.project.response.ExamResultResponse;
 import com.project.security.CustomUserDetail;
-import com.project.service.ExamResultService;
-import com.project.service.ExamService;
-import com.project.service.QuestionResultService;
-import com.project.service.UserService;
+import com.project.service.*;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,6 +22,8 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 @Service
 @Slf4j
@@ -42,6 +41,7 @@ public class ExamResultServiceImpl implements ExamResultService {
     private ExamService examService;
 
     private QuestionResultService questionResultService;
+
     @Autowired
     public ExamResultServiceImpl(@Lazy QuestionResultService questionResultService) {
         this.questionResultService = questionResultService;
@@ -50,16 +50,19 @@ public class ExamResultServiceImpl implements ExamResultService {
     @Autowired
     private ModelMapper mapper;
 
+    @Autowired
+    private AnswerService answerService;
+
 
     @Override
     public ExamResultResponse findAll() {
         List<ExamResultEntity> entities = repository.findAll();
 
         ExamResultResponse response = new ExamResultResponse();
-        if(entities.isEmpty()){
+        if (entities.isEmpty()) {
             response.setMessage("Exams not found");
             response.setStatusCode(HttpStatus.NOT_FOUND);
-        }else {
+        } else {
             List<ExamResultDto> dtos = new ArrayList<>();
             entities.forEach(e -> dtos.add(mapper.map(e, ExamResultDto.class)));
 
@@ -76,11 +79,11 @@ public class ExamResultServiceImpl implements ExamResultService {
         Optional<ExamResultEntity> examResultEntityOptional = repository.findById(id);
 
         ExamResultResponse response = new ExamResultResponse();
-        if(!examResultEntityOptional.isPresent()){
+        if (!examResultEntityOptional.isPresent()) {
             response.setMessage("exam not found");
             response.setStatusCode(HttpStatus.NOT_FOUND);
-        }else {
-            ExamResultDto dto = mapper.map(examResultEntityOptional.get(),ExamResultDto.class);
+        } else {
+            ExamResultDto dto = mapper.map(examResultEntityOptional.get(), ExamResultDto.class);
             response.setDto(dto);
             response.setMessage("OK");
             response.setStatusCode(HttpStatus.OK);
@@ -91,22 +94,43 @@ public class ExamResultServiceImpl implements ExamResultService {
 
     @Override
     public ExamResultResponse create(ExamResultRequest req) {
-        req.setStart_time(new Date().getTime());
-        String uuid = UUID.randomUUID().toString();
-        req.setUuid(uuid);
 
         ExamResultEntity examResult = new ExamResultEntity();
+        ExamResultResponse response = new ExamResultResponse();
+
+        String uuid = UUID.randomUUID().toString();
+        examResult.setUuid(uuid);
 
         ExamEntity exam = examService.findById(req.getExamId());
-
+        if (exam == null) {
+            response.setMessage("Exam not found");
+            response.setStatusCode(HttpStatus.BAD_REQUEST);
+            return response;
+        }
+        examResult.setExam(exam);
 
         UserEntity user = userAuth.getCurrent();
-        if (user != null){
+        if (user != null) {
             examResult.setUser(user);
         }
 
-        //examResult.setExam();
-        return null;
+        examResult.setStart_time(new Date());
+        examResult.setPoints(0);
+        examResult.setSubmit(false);
+
+        try {
+            ExamResultDto examResultDto = mapper.map(repository.save(examResult), ExamResultDto.class);
+            examResultDto.setExamId(exam.getId());
+            response.setDto(examResultDto);
+            response.setStatusCode(HttpStatus.OK);
+            response.setMessage("OK");
+        } catch (Exception e) {
+            response.setStatusCode(HttpStatus.BAD_REQUEST);
+            response.setMessage("Exception");
+            throw e;
+        }
+
+        return response;
     }
 
     @Override
@@ -133,28 +157,28 @@ public class ExamResultServiceImpl implements ExamResultService {
         return null;
     }
 
-    /*private ExamResultResponse save(ExamResultRequest req) {
-        Optional<ExamEntity> examEntityOptional = examService.findById(req.getExamId());
+    private ExamResultResponse save(ExamResultRequest req) {
+        ExamEntity examEntity = examService.findById(req.getExamId());
 
         ExamResultResponse response = new ExamResultResponse();
-        if(!examEntityOptional.isPresent()){
+        if (examEntity == null) {
             response.setMessage("exam is not found");
             response.setStatusCode(HttpStatus.NOT_FOUND);
             return response;
         }
 
-        ExamResultEntity entity = mapper.map(req,ExamResultEntity.class);
-        entity.setExam(examEntityOptional.get());
+        ExamResultEntity entity = mapper.map(req, ExamResultEntity.class);
+        entity.setExam(examEntity);
 
-        *//*if(req.getUserId() != null){
+        if (req.getUserId() != null) {
             Optional<UserEntity> userEntityOptional = userService.findById(req.getUserId());
-            if(!userEntityOptional.isPresent()){
+            if (!userEntityOptional.isPresent()) {
                 response.setMessage("User is not true");
                 response.setStatusCode(HttpStatus.NOT_FOUND);
                 return response;
             }
             entity.setUser(userEntityOptional.get());
-        }*//*
+        }
 
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
@@ -164,13 +188,13 @@ public class ExamResultServiceImpl implements ExamResultService {
         }
 
 
-        ExamResultDto dto = mapper.map(repository.save(entity),ExamResultDto.class);
+        ExamResultDto dto = mapper.map(repository.save(entity), ExamResultDto.class);
         response.setDto(dto);
         response.setMessage("OK");
         response.setStatusCode(HttpStatus.OK);
 
         return response;
-    }*/
+    }
 
     @Override
     public ExamResultResponse delete(Long id) {
@@ -197,12 +221,111 @@ public class ExamResultServiceImpl implements ExamResultService {
         return repository.findById(id);
     }
 
-    @Override
-    public ExamResultResponse submit(SubmitExamRequest req) {
-        Optional<ExamResultEntity> examResultEntityOptional = repository.findById(req.getExamResultId());
+    public ExamResultResponse submit(ExamResultRequest request) {
+        Optional<ExamResultEntity> examResultEntityOptional = repository.findById(request.getId());
+        ExamResultResponse response = new ExamResultResponse();
+        if (examResultEntityOptional.isEmpty()) {
+            response.setMessage("exam is not found");
+            response.setStatusCode(HttpStatus.NOT_FOUND);
+            return response;
+        }
+
+        ExamResultEntity examResult = examResultEntityOptional.get();
+
+        Long examId = request.getExamId();
+        ExamEntity exam = examService.findAllInfoExamById(examId);
+
+        var mapQuesById = exam.getQuestions()
+                .stream()
+                .collect(Collectors.toMap(QuestionEntity::getId, Function.identity()));
+
+        var questionResults = request.getQuestionResultRequests()
+                .stream()
+                .map(req -> createQuestResult(req, mapQuesById))
+                .collect(Collectors.toList());
+        questionResults.forEach(q -> {q.setExamResult(examResult);
+                                        q.setUuidExam(examResult.getUuid());});
+
+        int pointsResult = questionResults.stream().mapToInt(QuestionResultEntity::getPoint).sum();
+        examResult.setPoints(pointsResult);
+        examResult.setEnd_time(new Date());
+        questionResultService.saveBatch(questionResults);
+
+        //todo
+        ExamResultDto examResultDto = mapper.map(repository.save(examResult), ExamResultDto.class);
+        response.setDto(examResultDto);
+        response.setMessage("OK");
+        response.setStatusCode(HttpStatus.OK);
+        return response;
+    }
+
+    private QuestionResultEntity createQuestResult(QuestionResultRequest req, Map<Long, QuestionEntity> mapQuesById) {
+        QuestionEntity question = mapQuesById.get(req.getQuestionId());
+        if (QuestionType.FILL.equals(question.getType())) {
+            return createQuestionResultCaseFill(question, req);
+        } else {
+            return createQuestionResultCaseSelectType(question, req);
+        }
+    }
+
+    private QuestionResultEntity createQuestionResultCaseFill(QuestionEntity question, QuestionResultRequest request) {
+        QuestionResultEntity questionResult = new QuestionResultEntity();
+        questionResult.setQuestion(question);
+        List<String> results;
+        if (question.getAnswerWithTextsResult() == null) {
+            results = new ArrayList<>();
+        } else {
+            results = List.of(question.getAnswerWithTextsResult().split(","));
+        }
+        boolean isAnswerRight = results.contains(request.getContent());
+        if (isAnswerRight) {
+            questionResult.setPoint(question.getMaxPoint());
+        } else {
+            questionResult.setPoint(0);
+        }
+        questionResult.setContent(request.getContent());
+
+        return questionResult;
+    }
+
+    private QuestionResultEntity createQuestionResultCaseSelectType(QuestionEntity question,
+                                                                    QuestionResultRequest request) {
+        QuestionResultEntity questionResult = new QuestionResultEntity();
+
+        // set question
+        questionResult.setQuestion(question);
+
+        // set answers
+        var listAnsIdsOfUser = request.getAnswerIds();
+        List<AnswerEntity> answers = question.getAnswers().stream()
+                .filter(ans -> listAnsIdsOfUser != null && listAnsIdsOfUser.contains(ans.getId()))
+                .collect(Collectors.toList());
+
+        questionResult.setAnswers(answers);
+
+        // calculate points
+        List<Long> rightAnswerIds = question.getAnswers().stream()
+                .filter(ans -> ans.getIsResult() == 1)
+                .map(AnswerEntity::getId)
+                .collect(Collectors.toList());
+
+        boolean isUserAnswerRight = new HashSet<>(listAnsIdsOfUser).containsAll(rightAnswerIds)
+                && new HashSet<>(rightAnswerIds).containsAll(listAnsIdsOfUser);
+        if (isUserAnswerRight) {
+            questionResult.setPoint(question.getMaxPoint());
+        } else {
+            questionResult.setPoint(0);
+        }
+
+        return questionResult;
+    }
+
+    //@Override
+    public ExamResultResponse submit2(ExamResultRequest req) {
+        Optional<ExamResultEntity> examResultEntityOptional = repository.findById(req.getId());
 
         ExamResultResponse response = new ExamResultResponse();
-        if(!examResultEntityOptional.isPresent()){
+        if (examResultEntityOptional.isEmpty()) {
             response.setMessage("exam is not found");
             response.setStatusCode(HttpStatus.NOT_FOUND);
             return response;
@@ -210,25 +333,24 @@ public class ExamResultServiceImpl implements ExamResultService {
 
 
         try {
-           /* List<QuestionResultDto> questionResultDtos = questionResultService.saveAll(req.getQuestionResultRequests());
+            List<QuestionResultDto> questionResultDtos = questionResultService.saveAll(req.getQuestionResultRequests());
 
             int totalPoint = 0;
             for (QuestionResultDto questionResultDto : questionResultDtos) {
-                if(questionResultDto.getPoint() != null)
-                    totalPoint+=questionResultDto.getPoint();
+                if (questionResultDto.getPoint() != null)
+                    totalPoint += questionResultDto.getPoint();
             }
             req.setPoints(totalPoint);
 
-            req.setEnd_time(new Date().getTime());
+            req.setEndTime(new Date().getTime());
 
-            return save(req);*/
-        }catch (Exception e){
+            return save(req);
+        } catch (Exception e) {
             throw e;
             /*response.setMessage("Something wrong");
             response.setStatusCode(HttpStatus.BAD_REQUEST);
             return response;*/
         }
-        return null;
     }
 
     @Override
@@ -237,12 +359,12 @@ public class ExamResultServiceImpl implements ExamResultService {
                 req.getMinPoint(), req.getMaxPoint(), req.getLongTime());
 
         ExamResultResponse response = new ExamResultResponse();
-        if(entities.isEmpty()){
+        if (entities.isEmpty()) {
             response.setMessage("List is empty");
             response.setStatusCode(HttpStatus.NOT_FOUND);
-        }else {
+        } else {
             List<ExamResultDto> dtos = new ArrayList<>();
-            entities.forEach(e -> dtos.add(mapper.map(e,ExamResultDto.class)));
+            entities.forEach(e -> dtos.add(mapper.map(e, ExamResultDto.class)));
 
             response.setDtos(dtos);
             response.setMessage("OK");
@@ -252,13 +374,13 @@ public class ExamResultServiceImpl implements ExamResultService {
         return response;
     }
 
-    private UserEntity selfSubmit(ExamResultEntity examResultEntity){
+    private UserEntity selfSubmit(ExamResultEntity examResultEntity) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
         if (authentication != null && authentication.isAuthenticated()) {
             String userName = ((CustomUserDetail) authentication.getPrincipal()).getUsername();
             UserEntity user = examResultEntity.getUser();
-            if(!userName.equals(user.getUserName())){
+            if (!userName.equals(user.getUserName())) {
                 return user;
             }
         }

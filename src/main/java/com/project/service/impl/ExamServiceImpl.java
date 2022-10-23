@@ -16,7 +16,10 @@ import com.project.service.AnswerService;
 import com.project.service.ExamService;
 import com.project.service.QuestionService;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.poi.ss.usermodel.*;
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -434,6 +437,11 @@ public class ExamServiceImpl implements ExamService {
         }
 
         System.out.println("abc");
+    }
+
+    @Override
+    public ExamEntity findAllInfoExamById(Long examId) {
+        return repositoryCustom.findExamById(examId);
     }
 
     private QuestionEntity createQuestionFromRows(List<Row> rows) {

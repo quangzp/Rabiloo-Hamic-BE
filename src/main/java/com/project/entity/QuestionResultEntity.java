@@ -1,6 +1,7 @@
 package com.project.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.project.enums.QuestionType;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -12,11 +13,15 @@ import java.util.List;
 @Getter
 @Setter
 public class QuestionResultEntity extends BaseEntity{
+
+    @Column(name = "uuid_exam")
+    private String uuidExam;
     @Column
     private String content; // trac nghiem hoac dien text
 
     @Column
-    private String type;
+    @Enumerated(EnumType.STRING)
+    private QuestionType type;
 
     @Column
     private Integer point;
@@ -34,6 +39,6 @@ public class QuestionResultEntity extends BaseEntity{
     @JsonIgnore
     private ExamResultEntity examResult;
 
-    @OneToMany(fetch = FetchType.LAZY)
+    @ManyToMany(fetch = FetchType.LAZY)
     private List<AnswerEntity> answers;
 }
