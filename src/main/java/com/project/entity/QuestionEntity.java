@@ -4,6 +4,9 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.project.enums.QuestionType;
 import lombok.Getter;
 import lombok.Setter;
+import org.hibernate.annotations.CacheConcurrencyStrategy;
+import org.hibernate.annotations.LazyCollection;
+import org.hibernate.annotations.LazyCollectionOption;
 import org.hibernate.annotations.Where;
 
 import javax.persistence.*;
@@ -14,6 +17,9 @@ import java.util.List;
 @Getter
 @Setter
 @Where(clause = "deleted = false")
+@org.hibernate.annotations.Cache(
+		usage = CacheConcurrencyStrategy.READ_WRITE
+)
 public class QuestionEntity extends BaseEntity{
 	/**
 	 * 

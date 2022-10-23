@@ -19,10 +19,7 @@ import com.project.service.AnswerService;
 import com.project.service.ExamService;
 import com.project.service.QuestionService;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.poi.ss.usermodel.Cell;
-import org.apache.poi.ss.usermodel.Row;
-import org.apache.poi.ss.usermodel.Sheet;
-import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -60,6 +57,26 @@ public class ExamServiceImpl implements ExamService {
 
     @Autowired
     private ModelMapper mapper;
+
+    private CellStyle createHeaderCellStyle(Workbook workbook) {
+        CellStyle style = workbook.createCellStyle();
+        Font font = workbook.createFont();
+        font.setBold(true);
+        style.setAlignment(HorizontalAlignment.CENTER);
+        style.setVerticalAlignment(VerticalAlignment.CENTER);
+        style.setFillBackgroundColor(IndexedColors.BLUE1.index);
+        style.setFillPattern(FillPatternType.SOLID_FOREGROUND);
+        style.setWrapText(true);
+
+        return style;
+    }
+
+    private CellStyle createCenterTextStyle(Workbook workbook) {
+        CellStyle style = workbook.createCellStyle();
+        style.setAlignment(HorizontalAlignment.CENTER);
+
+        return style;
+    }
 
     static String[] HEADER_QUESTION = {
             "STT",
@@ -320,7 +337,7 @@ public class ExamServiceImpl implements ExamService {
     }
 
     public ByteArrayInputStream genExamExcelFile(Long examId) {
-        ExamEntity exam = repository.findByIdAndDeletedFalse(examId);
+        ExamEntity exam = repositoryCustom.findExamById(examId);
 
         if (exam == null) {
             return null;
@@ -328,7 +345,8 @@ public class ExamServiceImpl implements ExamService {
 
         try (Workbook workbook = new XSSFWorkbook(); ByteArrayOutputStream out = new ByteArrayOutputStream()) {
             Sheet sheet = workbook.createSheet("Question");
-            printHeaders(sheet, HEADER_QUESTION, 0);
+            CellStyle cellStyle = createHeaderCellStyle(workbook);
+            printHeaders(sheet, cellStyle, HEADER_QUESTION, 0);
 
             int rowIndex = 1;
             List<QuestionEntity> questions = exam.getQuestions();
@@ -337,10 +355,15 @@ public class ExamServiceImpl implements ExamService {
                 int imagesSize = question.getImages() == null ? 0 : question.getImages().size();
                 int ansSize = question.getAnswers() == null ? 0 : question.getAnswers().size();
                 int rowQuantity = Math.max(imagesSize, ansSize);
+                if(rowQuantity == 0) {
+                    rowQuantity++;
+                }
                 printQuestion(question, questionIndex, creatRows(sheet, rowIndex, rowQuantity));
                 rowIndex += rowQuantity;
                 questionIndex++;
             }
+
+            adjustWidthCollumn(sheet);
 
             workbook.write(out);
 
@@ -359,12 +382,34 @@ public class ExamServiceImpl implements ExamService {
         return result;
     }
 
-    public void printHeaders(Sheet sheet, String[] headers, int headerRowNumber) {
+    private void adjustWidthCollumn(Sheet sheet) {
+        // STT
+        sheet.setColumnWidth(0, 1000);
+        // noi dung
+        sheet.setColumnWidth(1, 15000);
+        // cap do
+        sheet.setColumnWidth(2, 2500);
+        // thang diem
+        sheet.setColumnWidth(3, 2500);
+        // loai cau hoi
+        sheet.setColumnWidth(4, 2500);
+        // linh vuc
+        sheet.setColumnWidth(5, 5000);
+        // cau tra loi
+        sheet.setColumnWidth(6, 10000);
+        // dap an
+        sheet.setColumnWidth(7, 2500);
+        // media
+        sheet.setColumnWidth(8, 10000);
+    }
+
+    public void printHeaders(Sheet sheet, CellStyle style, String[] headers, int headerRowNumber) {
         Row headerRow = sheet.createRow(headerRowNumber);
 
         for (int i = 0; i < headers.length; i++) {
             Cell cell = headerRow.createCell(i);
             cell.setCellValue(headers[i]);
+            cell.setCellStyle(style);
         }
     }
 
