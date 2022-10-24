@@ -83,8 +83,8 @@ public class ExamController {
                 .body(file);
     }
 
-    @PostMapping("admin/import-exam-via-excel")
-    public void importExamFromExcel(@RequestParam Long examId, @RequestParam MultipartFile file) throws IOException {
-        service.createExamFromExcelFile(examId, file);
+    @PostMapping("public/test-import-excel")
+    public void importExamFromExcel(@RequestParam MultipartFile file) throws IOException {
+        service.importExamFromExcelFile(file);
     }
 }

@@ -5,7 +5,10 @@ import com.project.dto.AnswerDto;
 import com.project.dto.ExamDto;
 import com.project.dto.MediaDto;
 import com.project.dto.QuestionDto;
-import com.project.entity.*;
+import com.project.entity.AnswerEntity;
+import com.project.entity.ExamEntity;
+import com.project.entity.MediaEntity;
+import com.project.entity.QuestionEntity;
 import com.project.enums.QuestionType;
 import com.project.repository.ExamRepository;
 import com.project.repository.ExamRepositoryCustom;
@@ -23,6 +26,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.ByteArrayInputStream;
@@ -385,10 +389,14 @@ public class ExamServiceImpl implements ExamService {
         }
 
         try (Workbook workbook = new XSSFWorkbook(); ByteArrayOutputStream out = new ByteArrayOutputStream()) {
-            Sheet sheet = workbook.createSheet("Question");
-            CellStyle headerCellStyle = createHeaderCellStyle(workbook);
-            CellStyle borderCellStyle = createBorderCellStyle(workbook);
-            printHeaders(sheet, headerCellStyle, HEADER_QUESTION, 0);
+            CellStyle borderCellStyle = createHeaderCellStyle(workbook);
+
+            Sheet examSheet = workbook.createSheet("Bai thi");
+            fillExamSheet(exam, examSheet, borderCellStyle);
+
+            Sheet questionsSheet = workbook.createSheet("Danh sach cau hoi");
+
+            printHeaders(questionsSheet, borderCellStyle, HEADER_QUESTION, 0);
 
             int rowIndex = 1;
             List<QuestionEntity> questions = exam.getQuestions();
@@ -400,12 +408,12 @@ public class ExamServiceImpl implements ExamService {
                 if (rowQuantity == 0) {
                     rowQuantity++;
                 }
-                printQuestion(question, borderCellStyle, questionIndex, creatRows(sheet, rowIndex, rowQuantity));
+                printQuestion(question, borderCellStyle, questionIndex, creatRows(questionsSheet, rowIndex, rowQuantity));
                 rowIndex += rowQuantity;
                 questionIndex++;
             }
 
-            adjustWidthCollumn(sheet);
+            adjustWidthCollumn(questionsSheet);
 
             workbook.write(out);
 
@@ -413,6 +421,28 @@ public class ExamServiceImpl implements ExamService {
         } catch (IOException ioException) {
             throw new RuntimeException("fail to gen questions excel file: " + ioException.getMessage());
         }
+    }
+
+    private void fillExamSheet(ExamEntity exam, Sheet sheet, CellStyle headerStyle) {
+        var rows = creatRows(sheet, 0, 4);
+
+        // title
+        fillExamRow(rows.get(0), "Tieu de: ", exam.getTitle(), headerStyle);
+
+        // description
+        fillExamRow(rows.get(1), "Chi tiet: ", exam.getDescription(), headerStyle);
+
+        // code of exam
+        fillExamRow(rows.get(2), "Ma code: ", exam.getCode(), headerStyle);
+    }
+
+    private void fillExamRow(Row row, String titleStr, String content, CellStyle cellStyle) {
+        Cell titleTitle = row.createCell(0);
+        titleTitle.setCellStyle(cellStyle);
+        titleTitle.setCellValue(titleStr);
+
+        Cell contentCell = row.createCell(1);
+        contentCell.setCellValue(content);
     }
 
     private List<Row> creatRows(Sheet sheet, int indexStart, int quantity) {
@@ -527,9 +557,17 @@ public class ExamServiceImpl implements ExamService {
         return dto;
     }
 
-    public void createExamFromExcelFile(Long examId, MultipartFile file) throws IOException {
+    /**
+     * Import exam via excel file
+     * @param file file
+     * @throws IOException ioException
+     */
+    public void importExamFromExcelFile(MultipartFile file) throws IOException {
         Workbook workbook = new XSSFWorkbook(file.getInputStream());
-        Sheet sheet = workbook.getSheetAt(0);
+        Sheet examDetailSheet = workbook.getSheetAt(0);
+        ExamEntity exam = createExamFromSheet(examDetailSheet);
+
+        Sheet sheet = workbook.getSheetAt(1);
 
         List<Row> rows = Lists.newArrayList(sheet.rowIterator());
         rows.remove(0);
@@ -550,11 +588,57 @@ public class ExamServiceImpl implements ExamService {
                 rs.add(row);
             }
         }
+        questions.add(createQuestionFromRows(rs));
 
-        ExamEntity exam = repository.findByIdAndDeletedFalse(examId);
         //set exam for questions
         questions.forEach(q -> q.setExam(exam));
-        questionService.saveAll(questions);
+        //questionService.saveAll(questions);
+
+        mapQuestionForAnsAndImages(questions);
+
+        exam.setQuestions(questions);
+
+        var e = repository.save(exam);
+    }
+
+    private void mapQuestionForAnsAndImages(List<QuestionEntity> questions) {
+        for (QuestionEntity question : questions) {
+            if(!CollectionUtils.isEmpty(question.getAnswers())) {
+                for (AnswerEntity answer : question.getAnswers()) {
+                    answer.setQuestion(question);
+                }
+            }
+            if(!CollectionUtils.isEmpty(question.getImages())) {
+                for (MediaEntity image : question.getImages()) {
+                    image.setQuestion(question);
+                }
+            }
+        }
+    }
+
+    private ExamEntity createExamFromSheet(Sheet sheet) {
+        ExamEntity exam = new ExamEntity();
+        List<Row> rows = Lists.newArrayList(sheet.rowIterator());
+        // get title
+        Row titleRow = rows.get(0);
+        String title = titleRow.getCell(1).getStringCellValue();
+        exam.setTitle(title);
+
+        // get description
+        Row descriptionRow = rows.get(1);
+        String description = descriptionRow.getCell(1).getStringCellValue();
+        exam.setDescription(description);
+
+        // get code
+        Row codeRow = rows.get(2);
+        String code = codeRow.getCell(1).getStringCellValue();
+        if ("".equals(code)) {
+            exam.setCode(null);
+        } else {
+            exam.setCode(code);
+        }
+
+        return exam;
     }
 
     @Override

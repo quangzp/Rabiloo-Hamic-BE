@@ -21,7 +21,7 @@ public interface ExamService extends BaseService<ExamResponse, ExamRequest> {
 
     ByteArrayInputStream genExamExcelFile(Long examId);
 
-    void createExamFromExcelFile(Long examId, MultipartFile file) throws IOException;
+    void importExamFromExcelFile(MultipartFile file) throws IOException;
 
     ExamEntity findAllInfoExamById(Long examId);
 
