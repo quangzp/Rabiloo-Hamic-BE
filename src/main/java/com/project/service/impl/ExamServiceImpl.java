@@ -5,10 +5,7 @@ import com.project.dto.AnswerDto;
 import com.project.dto.ExamDto;
 import com.project.dto.MediaDto;
 import com.project.dto.QuestionDto;
-import com.project.entity.AnswerEntity;
-import com.project.entity.ExamEntity;
-import com.project.entity.MediaEntity;
-import com.project.entity.QuestionEntity;
+import com.project.entity.*;
 import com.project.enums.QuestionType;
 import com.project.repository.ExamRepository;
 import com.project.repository.ExamRepositoryCustom;
@@ -311,7 +308,7 @@ public class ExamServiceImpl implements ExamService {
 
     private List<QuestionDto> randomQuestion(List<QuestionDto> questions) {
         questions.forEach(q -> {
-            if(q.getLevel() == null) {
+            if (q.getLevel() == null) {
                 q.setLevel(1);
             }
         });
@@ -400,7 +397,7 @@ public class ExamServiceImpl implements ExamService {
                 int imagesSize = question.getImages() == null ? 0 : question.getImages().size();
                 int ansSize = question.getAnswers() == null ? 0 : question.getAnswers().size();
                 int rowQuantity = Math.max(imagesSize, ansSize);
-                if(rowQuantity == 0) {
+                if (rowQuantity == 0) {
                     rowQuantity++;
                 }
                 printQuestion(question, borderCellStyle, questionIndex, creatRows(sheet, rowIndex, rowQuantity));
@@ -530,7 +527,7 @@ public class ExamServiceImpl implements ExamService {
         return dto;
     }
 
-    public void createExamFromExcelFile(Long examId,MultipartFile file) throws IOException {
+    public void createExamFromExcelFile(Long examId, MultipartFile file) throws IOException {
         Workbook workbook = new XSSFWorkbook(file.getInputStream());
         Sheet sheet = workbook.getSheetAt(0);
 
@@ -544,7 +541,7 @@ public class ExamServiceImpl implements ExamService {
             if (firstCell.getColumnIndex() > 0) {
                 rs.add(row);
             } else {
-                if(rs.size() == 0) {
+                if (rs.size() == 0) {
                     rs.add(row);
                     continue;
                 }
@@ -556,7 +553,7 @@ public class ExamServiceImpl implements ExamService {
 
         ExamEntity exam = repository.findByIdAndDeletedFalse(examId);
         //set exam for questions
-        questions.forEach(q-> q.setExam(exam));
+        questions.forEach(q -> q.setExam(exam));
         questionService.saveAll(questions);
     }
 

@@ -7,4 +7,5 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 public class UserResponse extends BaseResponse<UserDto>{
+    private Long total;
 }

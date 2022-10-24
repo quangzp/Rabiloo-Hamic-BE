@@ -15,5 +15,6 @@ public class ExamDto extends BaseDto {
     private String code;
     private Date startFrom;
     private Date endTo;
+    private Integer totalExamResult;
     private List<QuestionDto> questions;
 }

@@ -22,54 +22,54 @@ public class ExamController {
     private ExamService service;
 
     @GetMapping("/public/exam")
-    public ExamResponse getPublicExam(@RequestParam Long id){
+    public ExamResponse getPublicExam(@RequestParam Long id) {
         return service.findPublicExam(id);
     }
 
     @GetMapping("/public/exam-all")
-    public ExamResponse getPublicExams(){
+    public ExamResponse getPublicExams() {
         return service.findPublicExams();
     }
 
     @GetMapping("/user/exam")
-    public ExamResponse getOne(@RequestParam Long id){
+    public ExamResponse getOne(@RequestParam Long id) {
         return service.findOne(id);
     }
 
     @GetMapping("/user/exam-all")
-    public ExamResponse getAll(){
+    public ExamResponse getAll() {
         return service.findAll();
     }
 
     @GetMapping("/admin/exam")
-    public ExamResponse getOneByAdmin(@RequestParam Long id){
+    public ExamResponse getOneByAdmin(@RequestParam Long id) {
         return service.findOne(id);
     }
 
     @GetMapping("/admin/exam-all")
-    public ExamResponse getAllByAdmin(){
+    public ExamResponse getAllByAdmin() {
         return service.findAll();
     }
 
     @PostMapping("/admin/exam/exam-create")
-    public ExamResponse createExam(@RequestBody ExamRequest req){
+    public ExamResponse createExam(@RequestBody ExamRequest req) {
         return service.create(req);
     }
 
     @PutMapping("/admin/exam/exam-edit")
-    public ExamResponse updateExam(@RequestBody ExamRequest req){
+    public ExamResponse updateExam(@RequestBody ExamRequest req) {
         return service.update(req);
     }
 
     @DeleteMapping("/admin/exam/exam-delete")
-    public ExamResponse deleteExam(@RequestParam Long id){
+    public ExamResponse deleteExam(@RequestParam Long id) {
         return service.delete(id);
     }
 
     //TODO add filter exam api
     // filter by code, title, start, end ..v..v...
     @PostMapping("/public/exam/exam-filter")
-    public ExamResponse getExamsByFilterParam(@RequestBody ExamFilterRequest request){
+    public ExamResponse getExamsByFilterParam(@RequestBody ExamFilterRequest request) {
         return service.findExamsByParamNative(request);
     }
 
@@ -84,7 +84,7 @@ public class ExamController {
     }
 
     @PostMapping("admin/import-exam-via-excel")
-    public void importExamFromExcel(@RequestParam Long examId,@RequestParam MultipartFile file) throws IOException {
-        service.createExamFromExcelFile(examId,file);
+    public void importExamFromExcel(@RequestParam Long examId, @RequestParam MultipartFile file) throws IOException {
+        service.createExamFromExcelFile(examId, file);
     }
 }

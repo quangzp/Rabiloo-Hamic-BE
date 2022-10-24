@@ -49,7 +49,7 @@ public class CustomUserDetail implements UserDetails{
 
 	@Override
 	public boolean isAccountNonLocked() {
-		return true;
+		return !userEntity.getDeleted();
 	}
 
 	@Override
@@ -59,7 +59,7 @@ public class CustomUserDetail implements UserDetails{
 
 	@Override
 	public boolean isEnabled() {
-		return userEntity.getActive() == 1;
+		return userEntity.isActive();
 	}
 
 }

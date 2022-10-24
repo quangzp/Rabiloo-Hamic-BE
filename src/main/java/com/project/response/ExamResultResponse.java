@@ -7,4 +7,5 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 public class ExamResultResponse extends BaseResponse<ExamResultDto>{
+    private Long total;
 }

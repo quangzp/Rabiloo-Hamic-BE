@@ -63,13 +63,13 @@ public class NotificationServiceImpl implements NotificationService {
     @Override
     public NotificationResponse create(NotificationRequest req) {
         NotificationResponse response = new NotificationResponse();
-        if(req == null){
-            response.setMessage("notification is null");
+        if (req == null) {
+            response.setMessage("notification request is null");
             response.setStatusCode(HttpStatus.BAD_REQUEST);
-        }else {
-            NotificationEntity entity = mapper.map(req,NotificationEntity.class);
+        } else {
+            NotificationEntity notification = mapper.map(req, NotificationEntity.class);
 
-            NotificationDto dto = mapper.map(repository.save(entity),NotificationDto.class);
+            NotificationDto dto = mapper.map(repository.save(notification), NotificationDto.class);
             response.setDto(dto);
             response.setMessage("OK");
             response.setStatusCode(HttpStatus.OK);
@@ -80,7 +80,19 @@ public class NotificationServiceImpl implements NotificationService {
 
     @Override
     public NotificationResponse update(NotificationRequest req) {
-        return null;
+        var oldNotify = repository.findByIdAndDeletedFalse(req.getId());
+
+        oldNotify.setTitle(req.getTitle());
+        oldNotify.setDescription(req.getDescription());
+
+        var newNotify = repository.save(oldNotify);
+
+        NotificationResponse response = new NotificationResponse();
+        response.setDto(mapper.map(newNotify, NotificationDto.class));
+        response.setMessage("ok");
+        response.setStatusCode(HttpStatus.OK);
+
+        return response;
     }
 
     @Override

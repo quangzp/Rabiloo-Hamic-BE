@@ -10,6 +10,10 @@ import com.project.response.UserResponse;
 import com.project.service.UserService;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -18,6 +22,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class UserServiceImpl implements UserService {
@@ -128,7 +133,7 @@ public class UserServiceImpl implements UserService {
         } else {
             UserEntity entity = optional.get();
             entity.setDeleted(true);
-            entity.setActive(0);
+            entity.setActive(false);
             UserDto dto = mapper.map(repository.save(entity), UserDto.class);
 
             response.setMessage("OK");
@@ -171,8 +176,6 @@ public class UserServiceImpl implements UserService {
         user.setLastName(request.getLastName());
         user.setGender(request.getGender());
         user.setBirthDay(new Date(request.getBirthDay()));
-        user.setModifiedDate(new Date());
-        user.setModifiedBy(user.getId());
 
         response.setDto(mapper.map(repository.save(user), UserDto.class));
         response.setMessage("OK");
@@ -195,5 +198,52 @@ public class UserServiceImpl implements UserService {
             response.setStatusCode(HttpStatus.UNAUTHORIZED);
         }
         return response;
+    }
+
+    @Override
+    public UserResponse changePassword(UserRequest request) {
+        return null;
+    }
+
+    @Override
+    public UserResponse getAllUserNoneDeleted(Integer page, Integer size) {
+        Pageable pageable = PageRequest.of(page - 1, size, Sort.by("modifiedDate").descending());
+        Page<UserEntity> curPage = repository.findByDeletedFalse(pageable);
+
+        List<UserEntity> userEntities = curPage.getContent();
+        var userDtos = userEntities.stream()
+                                    .map(u -> toDto(u))
+                                    .collect(Collectors.toList());
+
+        UserResponse response = new UserResponse();
+        response.setTotal(curPage.getTotalElements());
+        response.setDtos(userDtos);
+        response.setMessage("ok");
+        response.setStatusCode(HttpStatus.OK);
+
+        return response;
+    }
+
+    UserDto toDto(UserEntity entity) {
+        UserDto dto = new UserDto();
+
+        dto.setId(entity.getId());
+        if(entity.getCreatedDate()!=null){
+            dto.setCreatedDate(entity.getCreatedDate().getTime());
+        }
+
+        if(entity.getModifiedDate()!=null){
+            dto.setModifiedDate(entity.getModifiedDate().getTime());
+        }
+        dto.setFirstName(entity.getFirstName());
+        dto.setLastName(entity.getLastName());
+        dto.setGender(entity.getGender());
+        dto.setCity(entity.getCity());
+        if(entity.getBirthDay() != null){
+            dto.setBirthDay(entity.getBirthDay().getTime());
+        }
+        dto.setUserName(entity.getUserName());
+
+        return dto;
     }
 }

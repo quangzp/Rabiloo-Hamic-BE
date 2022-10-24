@@ -19,6 +19,12 @@ public class UserController {
     public UserResponse getUser(){
         return service.getCurrent();
     }
+
+    @GetMapping("/admin/all-user")
+    public UserResponse getUsers(@RequestParam(defaultValue = "1") Integer page,
+                                 @RequestParam(defaultValue = "5") Integer size){
+        return service.getAllUserNoneDeleted(page,size);
+    }
     @PostMapping("/public/user-create")
     public UserResponse createUser(@Valid @RequestBody UserRequest request){
         return service.create(request);
@@ -28,4 +34,11 @@ public class UserController {
     public UserResponse updateUserInfo(@RequestBody UserRequest request){
         return service.updateUserInfo(request);
     }
+
+    @PutMapping("/admin/user-changing-password")
+    public UserResponse changePassword(@Valid @RequestBody UserRequest request){
+        return service.changePassword(request);
+    }
+
+
 }

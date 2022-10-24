@@ -39,9 +39,9 @@ public class UserEntity extends BaseEntity{
 	private String city;
 	
 	@Column(name = "active")
-	private int active = 1; // default account is active
+	private boolean active = Boolean.TRUE; // default account is active
 	
-	@ManyToMany(fetch = FetchType.LAZY,cascade = CascadeType.ALL)
+	@ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(name = "user_role", joinColumns = @JoinColumn(name = "user_id"), inverseJoinColumns = @JoinColumn(name = "role_id"))
     private List<RoleEntity> roles;
 

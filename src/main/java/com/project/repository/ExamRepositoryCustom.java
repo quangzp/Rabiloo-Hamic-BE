@@ -22,7 +22,7 @@ public class ExamRepositoryCustom {
                         "select distinct e " +
                                 "from ExamEntity e " +
                                 "        left outer join fetch e.questions as questions " +
-                                "where e.id = :examId ", ExamEntity.class)
+                                "where e.id = :examId", ExamEntity.class)
                 .setParameter("examId", examId)
                 .setHint(QueryHints.PASS_DISTINCT_THROUGH, false)
                 .getSingleResult();
@@ -36,8 +36,8 @@ public class ExamRepositoryCustom {
                                 "from ExamEntity e " +
                                 "        left outer join fetch e.questions as questions " +
                                 "where e.id = :examId " +
-                                "  and e.deleted = false" +
-                                "  and e.code is null ", ExamEntity.class)
+                                "   and e.deleted = false " +
+                                "   and e.code is null", ExamEntity.class)
                 .setParameter("examId", examId)
                 .setHint(QueryHints.PASS_DISTINCT_THROUGH, false)
                 .getSingleResult();

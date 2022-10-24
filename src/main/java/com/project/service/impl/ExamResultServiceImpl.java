@@ -2,7 +2,6 @@ package com.project.service.impl;
 
 import com.project.config.UserAuth;
 import com.project.dto.ExamResultDto;
-import com.project.dto.QuestionResultDto;
 import com.project.entity.*;
 import com.project.enums.QuestionType;
 import com.project.repository.ExamResultRepository;
@@ -16,6 +15,10 @@ import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -114,9 +117,9 @@ public class ExamResultServiceImpl implements ExamResultService {
             examResult.setUser(user);
         }
 
-        examResult.setStart_time(new Date());
+        examResult.setStart(new Date());
         examResult.setPoints(0);
-        examResult.setSubmit(false);
+        examResult.setSubmitted(false);
 
         try {
             ExamResultDto examResultDto = mapper.map(repository.save(examResult), ExamResultDto.class);
@@ -250,7 +253,8 @@ public class ExamResultServiceImpl implements ExamResultService {
 
         int pointsResult = questionResults.stream().mapToInt(QuestionResultEntity::getPoint).sum();
         examResult.setPoints(pointsResult);
-        examResult.setEnd_time(new Date());
+        examResult.setEnd(new Date());
+        examResult.setSubmitted(true);
         questionResultService.saveBatch(questionResults);
 
         //todo
@@ -322,38 +326,6 @@ public class ExamResultServiceImpl implements ExamResultService {
         return questionResult;
     }
 
-    //@Override
-    public ExamResultResponse submit2(ExamResultRequest req) {
-        Optional<ExamResultEntity> examResultEntityOptional = repository.findById(req.getId());
-
-        ExamResultResponse response = new ExamResultResponse();
-        if (examResultEntityOptional.isEmpty()) {
-            response.setMessage("exam is not found");
-            response.setStatusCode(HttpStatus.NOT_FOUND);
-            return response;
-        }
-
-
-        try {
-            List<QuestionResultDto> questionResultDtos = questionResultService.saveAll(req.getQuestionResultRequests());
-
-            int totalPoint = 0;
-            for (QuestionResultDto questionResultDto : questionResultDtos) {
-                if (questionResultDto.getPoint() != null)
-                    totalPoint += questionResultDto.getPoint();
-            }
-            req.setPoints(totalPoint);
-
-            req.setEndTime(new Date().getTime());
-
-            return save(req);
-        } catch (Exception e) {
-            throw e;
-            /*response.setMessage("Something wrong");
-            response.setStatusCode(HttpStatus.BAD_REQUEST);
-            return response;*/
-        }
-    }
 
     @Override
     public ExamResultResponse findExamsByParamNative(ExamResultFilterRequest req) {
@@ -377,22 +349,28 @@ public class ExamResultServiceImpl implements ExamResultService {
     }
 
     @Override
-    public ExamResultResponse findExamResultsByUser() {
-        return null;
-    }
+    public ExamResultResponse findExamResultsUser(Integer page, Integer size) {
+        UserEntity user = userAuth.getCurrent();
 
-    private UserEntity selfSubmit(ExamResultEntity examResultEntity) {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        Pageable pageable = PageRequest.of(page-1,size, Sort.by("end").descending());
+        Page<ExamResultEntity> pages = repository.findBySubmittedTrueAndUser_Id(user.getId(),pageable);
 
-        if (authentication != null && authentication.isAuthenticated()) {
-            String userName = ((CustomUserDetail) authentication.getPrincipal()).getUsername();
-            UserEntity user = examResultEntity.getUser();
-            if (!userName.equals(user.getUserName())) {
-                return user;
-            }
+        var examResultEntities = pages.getContent();
+        List<ExamResultDto> examResultDtos = new ArrayList<>();
+        for (ExamResultEntity examResultEntity : examResultEntities) {
+            ExamResultDto examResultDto = mapper.map(examResultEntity,ExamResultDto.class);
+            examResultDto.setTitleExam(examResultEntity.getExam().getTitle());
+            examResultDtos.add(examResultDto);
         }
 
-        return null;
+
+        ExamResultResponse response = new ExamResultResponse();
+        response.setTotal(pages.getTotalElements());
+        response.setDtos(examResultDtos);
+        response.setMessage("ok");
+        response.setStatusCode(HttpStatus.OK);
+
+        return response;
     }
 
 }

@@ -15,11 +15,12 @@ public class ExamResultController {
 
     //TODO create api start exam:
     // + save start time
-    @GetMapping("/user/exam-history")
-    public ExamResultResponse getExamsHistory() {
-        return service.findExamResultsByUser();
-    }
 
+    @GetMapping("/user/exams-history")
+    public ExamResultResponse getExamsHistory(@RequestParam(defaultValue = "1") Integer page,
+                                              @RequestParam(defaultValue = "5") Integer size) {
+        return service.findExamResultsUser(page,size);
+    }
     @PostMapping("/public/exam-start")
     public ExamResultResponse startExam(@RequestBody ExamResultRequest req) {
         return service.create(req);

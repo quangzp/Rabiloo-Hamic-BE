@@ -1,11 +1,10 @@
 package com.project.repository;
 
+import com.project.entity.ExamEntity;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
-
-import com.project.entity.ExamEntity;
 
 import java.util.List;
 
@@ -40,7 +39,7 @@ public interface ExamRepository extends JpaRepository<ExamEntity, Long>{
             "e.code," +
             "e.startFrom," +
             "e.endTo" +
-            ") " +
+            ")"+
             "from ExamEntity e " +
             "where e.deleted = false")
     List<ExamEntity> findByDeletedFalse();
@@ -55,4 +54,5 @@ public interface ExamRepository extends JpaRepository<ExamEntity, Long>{
             "and ex.deleted = false",nativeQuery = true
     )
     List<ExamEntity> findExamsByParamNative(String code, String title, String startTime,String endTime);
+
 }

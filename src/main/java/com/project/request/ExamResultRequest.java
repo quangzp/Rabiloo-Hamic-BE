@@ -11,7 +11,6 @@ public class ExamResultRequest {
     private Integer points;
     private Long examId;
     private Long userId;
-    private boolean isSubmit;
     private Long endTime;
     private List<QuestionResultRequest> questionResultRequests;
 }

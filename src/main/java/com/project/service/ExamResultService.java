@@ -14,7 +14,6 @@ public interface ExamResultService extends BaseService<ExamResultResponse,ExamRe
 
     ExamResultResponse findExamsByParamNative(ExamResultFilterRequest req);
 
-    ExamResultResponse findExamResultsByUser();
+    ExamResultResponse findExamResultsUser(Integer page, Integer size);
 
-    //ExamResultResponse findByUser();
 }

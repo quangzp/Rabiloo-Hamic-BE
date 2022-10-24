@@ -17,13 +17,12 @@ public interface ExamService extends BaseService<ExamResponse, ExamRequest> {
 
     ExamResponse findExamsByParamNative(ExamFilterRequest request);
 
-
     ExamResponse findPublicExams();
-
 
     ByteArrayInputStream genExamExcelFile(Long examId);
 
-    void createExamFromExcelFile(Long examId,MultipartFile file) throws IOException;
+    void createExamFromExcelFile(Long examId, MultipartFile file) throws IOException;
 
     ExamEntity findAllInfoExamById(Long examId);
+
 }

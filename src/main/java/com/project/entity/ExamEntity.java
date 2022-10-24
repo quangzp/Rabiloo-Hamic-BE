@@ -4,8 +4,6 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.Accessors;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
-import org.hibernate.annotations.LazyCollection;
-import org.hibernate.annotations.LazyCollectionOption;
 
 import javax.persistence.*;
 import java.util.Date;
@@ -47,6 +45,9 @@ public class ExamEntity extends BaseEntity {
     @ManyToMany(mappedBy = "exams")
     private List<UserEntity> user;
 
+    @Transient
+    private Long totalExamResults;
+
 	public ExamEntity(Long id, String title, String description, String type, String code, Date startFrom, Date endTo) {
 		this.setId(id);
 		this.title = title;
@@ -55,6 +56,7 @@ public class ExamEntity extends BaseEntity {
 		this.code = code;
 		this.startFrom = startFrom;
 		this.endTo = endTo;
+        //this.totalExamResults = totalExamResults;
 	}
 
 	public ExamEntity() {

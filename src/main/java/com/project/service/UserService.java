@@ -15,4 +15,8 @@ public interface UserService extends BaseService<UserResponse,UserRequest>{
     UserResponse updateUserInfo(UserRequest request);
 
     UserResponse getCurrent();
+
+    UserResponse changePassword(UserRequest request);
+
+    UserResponse getAllUserNoneDeleted(Integer page, Integer size);
 }
