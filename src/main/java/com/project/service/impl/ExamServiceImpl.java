@@ -590,15 +590,13 @@ public class ExamServiceImpl implements ExamService {
         }
         questions.add(createQuestionFromRows(rs));
 
-        //set exam for questions
         questions.forEach(q -> q.setExam(exam));
-        //questionService.saveAll(questions);
-
         mapQuestionForAnsAndImages(questions);
 
         exam.setQuestions(questions);
 
-        var e = repository.save(exam);
+        var examSaved = repository.save(exam);
+
     }
 
     private void mapQuestionForAnsAndImages(List<QuestionEntity> questions) {
@@ -655,13 +653,15 @@ public class ExamServiceImpl implements ExamService {
         setTypeForQuestion(question, cells.get(4));
 
         List<AnswerEntity> answers = new ArrayList<>();
+        List<MediaEntity> images = new ArrayList<>();
         for (int i = 0; i < rows.size(); i++) {
             answers.add(createAnswerFromRow(rows.get(i), i));
+            images.add(createImageObjFromRow(rows.get(i), i));
         }
 
         question.setAnswers(answers);
+        question.setImages(images);
 
-        //todo create media
 
         return question;
     }
@@ -703,6 +703,19 @@ public class ExamServiceImpl implements ExamService {
         }
 
         return answer;
+    }
+
+    private MediaEntity createImageObjFromRow(Row row, int index) {
+        MediaEntity image = new MediaEntity();
+        List<Cell> cells = Lists.newArrayList(row.cellIterator());
+        if (index == 0) {
+            image.setPath(cells.get(8).getStringCellValue());
+        } else {
+            image.setPath(cells.get(0).getStringCellValue());
+        }
+        image.setType("image");
+
+        return image;
     }
 
     private void setContentForAnswer(AnswerEntity answer, Cell cell) {
