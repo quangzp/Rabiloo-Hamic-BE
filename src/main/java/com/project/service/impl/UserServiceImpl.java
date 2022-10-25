@@ -225,10 +225,13 @@ public class UserServiceImpl implements UserService {
         UserEntity user = userAuth.getCurrent();
 
         UserResponse response = new UserResponse();
-        if(!passwordEncoder.encode(request.getOldPassword()).equals(user.getPassword())){
+
+        if(!passwordEncoder.matches(request.getOldPassword(), user.getPassword())){
             response.setMessage(" old password not match in db");
             response.setStatusCode(HttpStatus.BAD_REQUEST);
+            return response;
         }
+
         user.setPassword(passwordEncoder.encode(request.getNewPassword()));
         try{
             repository.save(user);
