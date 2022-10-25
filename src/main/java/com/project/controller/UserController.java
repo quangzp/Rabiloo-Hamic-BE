@@ -60,7 +60,7 @@ public class UserController {
     }
 
     @PostMapping("/public/register")
-    public String requestRegister(@RequestParam String email) {
+    public UserResponse requestRegister(@RequestParam String email) {
         return registerUserService.requestRegister(email);
     }
 

@@ -453,16 +453,19 @@ public class ExamServiceImpl implements ExamService {
     }
 
     private void fillExamSheet(ExamEntity exam, Sheet sheet, CellStyle headerStyle) {
-        var rows = creatRows(sheet, 0, 4);
+        var rows = creatRows(sheet, 0, 5);
 
         // title
-        fillExamRow(rows.get(0), "Tieu de: ", exam.getTitle(), headerStyle);
+        fillExamRow(rows.get(0), "Tiêu đề: ", exam.getTitle(), headerStyle);
 
         // description
-        fillExamRow(rows.get(1), "Chi tiet: ", exam.getDescription(), headerStyle);
+        fillExamRow(rows.get(1), "Chi tiết: ", exam.getDescription(), headerStyle);
 
         // code of exam
-        fillExamRow(rows.get(2), "Ma code: ", exam.getCode(), headerStyle);
+        fillExamRow(rows.get(2), "Mã code: ", exam.getCode(), headerStyle);
+
+        // total of time
+        fillExamRow(rows.get(3), "Thời gian làm bài: ", exam.getTotalExamResults().toString(), headerStyle);
     }
 
     private void fillExamRow(Row row, String titleStr, String content, CellStyle cellStyle) {
@@ -669,6 +672,13 @@ public class ExamServiceImpl implements ExamService {
             if (!"".equals(code)) {
                 exam.setCode(code);
             }
+        }
+
+        Row totalTimeRow = rows.get(3);
+        Cell totalTimeCell = totalTimeRow.getCell(1);
+        if(Objects.nonNull(totalTimeCell)) {
+            int totalTime = Double.valueOf(totalTimeCell.getNumericCellValue()).intValue();
+            exam.setTotalTime(totalTime);
         }
 
 

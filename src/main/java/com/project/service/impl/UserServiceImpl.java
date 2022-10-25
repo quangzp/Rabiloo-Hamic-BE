@@ -335,4 +335,9 @@ public class UserServiceImpl implements UserService {
 
         return res;
     }
+
+    @Override
+    public boolean isEmailRegistered(String email) {
+        return repository.findByUserName(email) != null;
+    }
 }

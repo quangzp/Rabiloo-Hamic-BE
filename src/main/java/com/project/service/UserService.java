@@ -24,4 +24,6 @@ public interface UserService extends BaseService<UserResponse,UserRequest>{
     UserResponse deactivate(Long id);
 
     UserResponse resetPassword(String email, String token, String newPassword);
+
+    boolean isEmailRegistered(String email);
 }

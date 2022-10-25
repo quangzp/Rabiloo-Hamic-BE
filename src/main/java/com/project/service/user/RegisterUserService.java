@@ -3,10 +3,12 @@ package com.project.service.user;
 import com.project.entity.RegisterUser;
 import com.project.repository.RegisterUserRepository;
 import com.project.repository.UserRepository;
+import com.project.response.UserResponse;
 import com.project.service.EmailService;
 import com.project.utils.RandomUtilsHamic;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 import java.util.Date;
@@ -40,7 +42,15 @@ public class RegisterUserService {
         return repository.findByEmailAndRegisterCode(email, code).isPresent();
     }
 
-    public String requestRegister(String email) {
+    public UserResponse requestRegister(String email) {
+        UserResponse res = new UserResponse();
+        if(userRepository.findByUserName(email) != null) {
+            res.setStatusCode(HttpStatus.BAD_REQUEST);
+            res.setMessage("Email already registered");
+
+            return res;
+        }
+
         //TODO add validate email later
         String code = RandomUtilsHamic.genRandomStringCode();
         new Thread(() -> emailService.senMimeMessageMail(
@@ -55,6 +65,7 @@ public class RegisterUserService {
         registerUser.setRequestTime(new Date());
         repository.save(registerUser);
 
-        return "request register success";
+        res.setStatusCode(HttpStatus.OK);
+        return res;
     }
 }
