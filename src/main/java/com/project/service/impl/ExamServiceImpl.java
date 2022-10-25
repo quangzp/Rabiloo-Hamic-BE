@@ -1,12 +1,14 @@
 package com.project.service.impl;
 
 import com.google.common.collect.Lists;
+import com.project.config.UserAuth;
 import com.project.dto.*;
 import com.project.entity.AnswerEntity;
 import com.project.entity.ExamEntity;
 import com.project.entity.MediaEntity;
 import com.project.entity.QuestionEntity;
 import com.project.enums.QuestionType;
+import com.project.enums.RoleType;
 import com.project.repository.ExamRepository;
 import com.project.repository.ExamRepositoryCustom;
 import com.project.request.ExamFilterRequest;
@@ -38,6 +40,9 @@ import java.util.stream.Collectors;
 @Service
 @Slf4j
 public class ExamServiceImpl implements ExamService {
+
+    @Autowired
+    private UserAuth userAuth;
 
     @Autowired
     private ExamRepository repository;
@@ -569,10 +574,13 @@ public class ExamServiceImpl implements ExamService {
     }
 
     ExamDto toDto(ExamEntity entity) {
+        var user = userAuth.getCurrent();
         ExamDto dto = new ExamDto();
 
         dto.setId(entity.getId());
-        dto.setCode(entity.getCode());
+        if (user.getRole().equals(RoleType.ROLE_ADMIN)) {
+            dto.setCode(entity.getCode());
+        }
         dto.setTitle(entity.getTitle());
         dto.setDescription(entity.getDescription());
         dto.setStartFrom(entity.getStartFrom());
@@ -653,13 +661,16 @@ public class ExamServiceImpl implements ExamService {
         exam.setDescription(description);
 
         // get code
+
         Row codeRow = rows.get(2);
-        String code = codeRow.getCell(1).getStringCellValue();
-        if ("".equals(code)) {
-            exam.setCode(null);
-        } else {
-            exam.setCode(code);
+        Cell codeCell = codeRow.getCell(1);
+        if (Objects.nonNull(codeCell)) {
+            String code = codeCell.getStringCellValue().trim();
+            if (!"".equals(code)) {
+                exam.setCode(code);
+            }
         }
+
 
         return exam;
     }

@@ -17,9 +17,10 @@ public interface ExamRepository extends JpaRepository<ExamEntity, Long>{
     ExamEntity findDistinctByIdAndCodeNullAndDeletedFalse(Long id);
 
     //@EntityGraph(attributePaths = {"questions", "questions.answers"})
-    @Query(value = "select * from exam" +
-            " where exam.code is null" +
-            " and exam.deleted = false",nativeQuery = true)
+    @Query(value = "select * from exam " +
+            "where exam.code is null" +
+            " and exam.deleted = false " +
+            "order by e.createdDate desc",nativeQuery = true)
     List<ExamEntity> findByCodeNullAndDeletedFalse();
 
 
@@ -43,7 +44,8 @@ public interface ExamRepository extends JpaRepository<ExamEntity, Long>{
             "e.endTo" +
             ")"+
             "from ExamEntity e " +
-            "where e.deleted = false")
+            "where e.deleted = false " +
+            "order by e.createdDate desc")
     List<ExamEntity> findByDeletedFalse();
 
 

@@ -111,6 +111,17 @@ public class ExamResultServiceImpl implements ExamResultService {
             response.setStatusCode(HttpStatus.BAD_REQUEST);
             return response;
         }
+
+        String examCode = exam.getCode();
+        String reqCode = req.getCode();
+
+        if(examCode != null){
+            if(reqCode == null || !examCode.equals(reqCode)){
+                response.setMessage("not matching code");
+                response.setStatusCode(HttpStatus.BAD_REQUEST);
+                return response;
+            }
+        }
         examResult.setExam(exam);
 
         UserEntity user = userAuth.getCurrent();
