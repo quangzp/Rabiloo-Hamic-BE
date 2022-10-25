@@ -3,7 +3,11 @@ package com.project.service;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
+
+import javax.mail.MessagingException;
+import javax.mail.internet.MimeMessage;
 
 @Service
 public class EmailService {
@@ -17,5 +21,21 @@ public class EmailService {
         message.setSubject(subject);
         message.setText(text);
         emailSender.send(message);
+    }
+
+    public void senMimeMessageMail(String to, String subject, String text) {
+        try {
+            MimeMessage mail = emailSender.createMimeMessage();
+            mail.setSubject(subject, "UTF-8");
+
+            MimeMessageHelper helper = new MimeMessageHelper(mail, true, "UTF-8");
+            helper.setFrom("rabiloo.hamic.team7@gmail.com");
+            helper.setTo(to);
+            helper.setText(text, true);
+
+            emailSender.send(mail);
+        } catch (MessagingException e) {
+            throw new RuntimeException(e);
+        }
     }
 }

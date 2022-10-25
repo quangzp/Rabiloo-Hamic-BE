@@ -9,6 +9,7 @@ import com.project.request.ChangePasswordRequest;
 import com.project.request.UserRequest;
 import com.project.response.UserResponse;
 import com.project.service.UserService;
+import com.project.service.user.RegisterUserService;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -38,6 +39,9 @@ public class UserServiceImpl implements UserService {
 
     @Autowired
     private PasswordEncoder passwordEncoder;
+
+    @Autowired
+    private RegisterUserService registerUserService;
 
     @Override
     public UserResponse findAll() {
@@ -82,11 +86,21 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public UserResponse create(UserRequest req) {
+        UserResponse response = new UserResponse();
+
+        // check register code
+        boolean isNotRequestedRegister = !registerUserService.checkRegisterCode(req.getUserName(), req.getRegisterCode());
+        if(isNotRequestedRegister) {
+            response.setMessage("Not request register yet");
+            response.setStatusCode(HttpStatus.BAD_REQUEST);
+
+            return response;
+        }
+
         UserEntity user;
 
         user = repository.findByUserName(req.getUserName());
 
-        UserResponse response = new UserResponse();
         if (user != null) {
             response.setMessage("User name is exits");
             response.setStatusCode(HttpStatus.BAD_REQUEST);

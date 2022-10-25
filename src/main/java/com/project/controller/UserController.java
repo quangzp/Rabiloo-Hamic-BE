@@ -4,6 +4,7 @@ import com.project.request.ChangePasswordRequest;
 import com.project.request.UserRequest;
 import com.project.response.UserResponse;
 import com.project.service.UserService;
+import com.project.service.user.RegisterUserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -15,6 +16,9 @@ public class UserController {
 
     @Autowired
     private UserService service;
+
+    @Autowired
+    private RegisterUserService registerUserService;
 
     @GetMapping("/user/info")
     public UserResponse getUser(){
@@ -51,5 +55,13 @@ public class UserController {
         return service.deactivate(id);
     }
 
+    @PostMapping("/public/register")
+    public String requestRegister(@RequestParam String email) {
+        return registerUserService.requestRegister(email);
+    }
 
+    @PostMapping("/public/forgot-password")
+    public String requestForgotPassword(@RequestParam String email) {
+        return null;
+    }
 }

@@ -19,4 +19,5 @@ public class UserRequest {
     private Long birthDay;
     private String gender;
     private String city;
+    private String registerCode;
 }

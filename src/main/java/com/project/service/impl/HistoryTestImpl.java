@@ -109,6 +109,7 @@ public class HistoryTestImpl implements HistoryTestService {
         }
 
         HistoryTestResponse response = new HistoryTestResponse();
+        response.setTotal(pages.getTotalElements());
         response.setDtos(historyTests);
         response.setMessage("OK");
         response.setStatusCode(HttpStatus.OK);
