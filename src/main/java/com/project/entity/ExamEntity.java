@@ -37,7 +37,7 @@ public class ExamEntity extends BaseEntity {
     private Date endTo;
 
     @Column(name = "total_time")
-    private Integer totalTime = 60;
+    private Integer totalTime;
 
     @OneToMany(mappedBy = "exam", cascade = CascadeType.ALL)
     private List<QuestionEntity> questions;

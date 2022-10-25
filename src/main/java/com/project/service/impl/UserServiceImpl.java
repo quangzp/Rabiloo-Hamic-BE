@@ -330,7 +330,7 @@ public class UserServiceImpl implements UserService {
         }
 
         user.setPassword(passwordEncoder.encode(newPassword));
-
+        repository.save(user);
         res.setStatusCode(HttpStatus.OK);
 
         return res;

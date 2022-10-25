@@ -202,7 +202,11 @@ public class ExamServiceImpl implements ExamService {
     public ExamResponse create(ExamRequest req) {
         ExamResponse response = new ExamResponse();
         try {
-            ExamEntity entity = repository.save(mapper.map(req, ExamEntity.class));
+            var examDataSaver = mapper.map(req, ExamEntity.class);
+            if(req.getTotalTime() == null){
+                examDataSaver.setTotalTime(60);
+            }
+            ExamEntity entity = repository.save(examDataSaver);
             ExamDto dto = mapper.map(entity, ExamDto.class);
 
             response.setDto(dto);
