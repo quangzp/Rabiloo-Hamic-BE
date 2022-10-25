@@ -1,6 +1,5 @@
 package com.project.security;
 
-import com.project.entity.RoleEntity;
 import com.project.entity.UserEntity;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -26,9 +25,8 @@ public class CustomUserDetail implements UserDetails{
 	@Override
 	public Collection<? extends GrantedAuthority> getAuthorities() {
 		List<SimpleGrantedAuthority> authorities = new ArrayList<>();
-        for (RoleEntity role : userEntity.getRoles()) {
-            authorities.add(new SimpleGrantedAuthority(role.getName()));
-        }
+
+		authorities.add(new SimpleGrantedAuthority(userEntity.getRole().name()));
         return authorities;
 	}
 

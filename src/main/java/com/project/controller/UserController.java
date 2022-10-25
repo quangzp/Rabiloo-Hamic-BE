@@ -1,5 +1,6 @@
 package com.project.controller;
 
+import com.project.request.ChangePasswordRequest;
 import com.project.request.UserRequest;
 import com.project.response.UserResponse;
 import com.project.service.UserService;
@@ -35,9 +36,19 @@ public class UserController {
         return service.updateUserInfo(request);
     }
 
-    @PutMapping("/admin/user-changing-password")
-    public UserResponse changePassword(@Valid @RequestBody UserRequest request){
+    @PutMapping("/user/user-changing-password")
+    public UserResponse changePassword(@Valid @RequestBody ChangePasswordRequest request){
         return service.changePassword(request);
+    }
+
+    @PutMapping("/user/user-reset-password")
+    public UserResponse resetPassword(@RequestParam String userName){
+        return null;
+    }
+
+    @DeleteMapping("/admin/user-deactivate")
+    public UserResponse deactivate(@RequestParam Long id){
+        return service.deactivate(id);
     }
 
 

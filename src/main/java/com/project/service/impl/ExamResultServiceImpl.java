@@ -1,6 +1,7 @@
 package com.project.service.impl;
 
 import com.project.config.UserAuth;
+import com.project.dto.CountExamResultDto;
 import com.project.dto.ExamResultDto;
 import com.project.entity.*;
 import com.project.enums.QuestionType;
@@ -40,14 +41,14 @@ public class ExamResultServiceImpl implements ExamResultService {
     @Autowired
     private UserService userService;
 
-    @Autowired
     private ExamService examService;
-
     private QuestionResultService questionResultService;
 
     @Autowired
-    public ExamResultServiceImpl(@Lazy QuestionResultService questionResultService) {
+    public ExamResultServiceImpl(@Lazy ExamService examService,
+                                 @Lazy QuestionResultService questionResultService) {
         this.questionResultService = questionResultService;
+        this.examService = examService;
     }
 
     @Autowired
@@ -349,28 +350,18 @@ public class ExamResultServiceImpl implements ExamResultService {
     }
 
     @Override
-    public ExamResultResponse findExamResultsUser(Integer page, Integer size) {
+    public Page<ExamResultEntity> findExamResultsUser(Integer page, Integer size) {
         UserEntity user = userAuth.getCurrent();
 
         Pageable pageable = PageRequest.of(page-1,size, Sort.by("end").descending());
         Page<ExamResultEntity> pages = repository.findBySubmittedTrueAndUser_Id(user.getId(),pageable);
 
-        var examResultEntities = pages.getContent();
-        List<ExamResultDto> examResultDtos = new ArrayList<>();
-        for (ExamResultEntity examResultEntity : examResultEntities) {
-            ExamResultDto examResultDto = mapper.map(examResultEntity,ExamResultDto.class);
-            examResultDto.setTitleExam(examResultEntity.getExam().getTitle());
-            examResultDtos.add(examResultDto);
-        }
+        return pages;
+    }
 
-
-        ExamResultResponse response = new ExamResultResponse();
-        response.setTotal(pages.getTotalElements());
-        response.setDtos(examResultDtos);
-        response.setMessage("ok");
-        response.setStatusCode(HttpStatus.OK);
-
-        return response;
+    @Override
+    public List<CountExamResultDto> count() {
+        return repository.countExamResults();
     }
 
 }

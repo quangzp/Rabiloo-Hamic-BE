@@ -1,5 +1,6 @@
 package com.project.repository;
 
+import com.project.dto.CountExamResultDto;
 import com.project.entity.ExamResultEntity;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -21,5 +22,14 @@ public interface ExamResultRepository extends JpaRepository<ExamResultEntity, Lo
     List<ExamResultEntity> findExamResultsByParamNative(Long examId, Integer minPoint, Integer maxPoint, Integer longTime);
 
     Page<ExamResultEntity> findBySubmittedTrueAndUser_Id(Long userId, Pageable pageable);
+
+    @Query(value = "select new com.project.dto.CountExamResultDto(" +
+            "count(ex),"+
+            "ex.exam.id" +
+            ") " +
+            "from ExamResultEntity as ex " +
+            "where ex.submitted = true " +
+            "group by ex.exam.id")
+    List<CountExamResultDto> countExamResults();
 
 }

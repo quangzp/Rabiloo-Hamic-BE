@@ -1,10 +1,7 @@
 package com.project.service.impl;
 
 import com.google.common.collect.Lists;
-import com.project.dto.AnswerDto;
-import com.project.dto.ExamDto;
-import com.project.dto.MediaDto;
-import com.project.dto.QuestionDto;
+import com.project.dto.*;
 import com.project.entity.AnswerEntity;
 import com.project.entity.ExamEntity;
 import com.project.entity.MediaEntity;
@@ -16,6 +13,7 @@ import com.project.request.ExamFilterRequest;
 import com.project.request.ExamRequest;
 import com.project.response.ExamResponse;
 import com.project.service.AnswerService;
+import com.project.service.ExamResultService;
 import com.project.service.ExamService;
 import com.project.service.QuestionService;
 import lombok.extern.slf4j.Slf4j;
@@ -47,10 +45,13 @@ public class ExamServiceImpl implements ExamService {
     private ExamRepositoryCustom repositoryCustom;
 
     private QuestionService questionService;
+    private ExamResultService examResultService;
 
     @Autowired
-    public ExamServiceImpl(@Lazy QuestionService questionService) {
+    public ExamServiceImpl(@Lazy QuestionService questionService,
+                           @Lazy ExamResultService examResultService) {
         this.questionService = questionService;
+        this.examResultService = examResultService;
     }
 
     @Autowired
@@ -123,6 +124,16 @@ public class ExamServiceImpl implements ExamService {
         } else {
             List<ExamDto> dtos = new ArrayList<>();
             entities.forEach(e -> dtos.add(toDto(e)));
+
+            List<CountExamResultDto> countExamResultDtos = countExamResults();
+            for (ExamDto dto : dtos) {
+                for (CountExamResultDto countExamResultDto : countExamResultDtos) {
+                    if(dto.getId() == countExamResultDto.getExamId()){
+                        dto.setTotalExamResult(countExamResultDto.getTotal());
+                        break;
+                    }
+                }
+            }
 
             response.setDtos(dtos);
             response.setMessage("OK");
@@ -373,6 +384,17 @@ public class ExamServiceImpl implements ExamService {
 
         List<ExamDto> dtos = new ArrayList<>();
         entities.forEach(e -> dtos.add(toDto(e)));
+
+        List<CountExamResultDto> countExamResultDtos = countExamResults();
+        for (ExamDto dto : dtos) {
+            for (CountExamResultDto countExamResultDto : countExamResultDtos) {
+                if(dto.getId() == countExamResultDto.getExamId()){
+                    dto.setTotalExamResult(countExamResultDto.getTotal());
+                    break;
+                }
+            }
+        }
+
         ExamResponse response = new ExamResponse();
         response.setDtos(dtos);
         response.setMessage("Ok");
@@ -656,7 +678,10 @@ public class ExamServiceImpl implements ExamService {
         List<MediaEntity> images = new ArrayList<>();
         for (int i = 0; i < rows.size(); i++) {
             answers.add(createAnswerFromRow(rows.get(i), i));
-            images.add(createImageObjFromRow(rows.get(i), i));
+            MediaEntity image = createImageObjFromRow(rows.get(i), i);
+            if (image != null && image.getPath() != null) {
+                images.add(image);
+            }
         }
 
         question.setAnswers(answers);
@@ -708,10 +733,23 @@ public class ExamServiceImpl implements ExamService {
     private MediaEntity createImageObjFromRow(Row row, int index) {
         MediaEntity image = new MediaEntity();
         List<Cell> cells = Lists.newArrayList(row.cellIterator());
+        int cellsSize = cells.size();
         if (index == 0) {
+            if (cellsSize < 9) {
+                return null;
+            }
             image.setPath(cells.get(8).getStringCellValue());
         } else {
-            image.setPath(cells.get(0).getStringCellValue());
+            if (cellsSize == 1) {
+                image.setPath(cells.get(0).getStringCellValue());
+            } else if (cellsSize == 3) {
+                String path = cells.get(2).getStringCellValue();
+                if(path != null) {
+                    image.setPath(cells.get(2).getStringCellValue());
+                } else {
+                    return null;
+                }
+            }
         }
         image.setType("image");
 
@@ -732,5 +770,9 @@ public class ExamServiceImpl implements ExamService {
         } catch (Exception e) {
             log.info("set content for answer fail");
         }
+    }
+
+    private List<CountExamResultDto> countExamResults(){
+        return examResultService.count();
     }
 }

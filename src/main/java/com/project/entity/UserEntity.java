@@ -1,11 +1,10 @@
 package com.project.entity;
 
+import com.project.enums.RoleType;
 import lombok.Getter;
 import lombok.Setter;
-import org.springframework.util.CollectionUtils;
 
 import javax.persistence.*;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -39,11 +38,9 @@ public class UserEntity extends BaseEntity{
 	private String city;
 	
 	@Column(name = "active")
-	private boolean active = Boolean.TRUE; // default account is active
-	
-	@ManyToMany(fetch = FetchType.LAZY)
-    @JoinTable(name = "user_role", joinColumns = @JoinColumn(name = "user_id"), inverseJoinColumns = @JoinColumn(name = "role_id"))
-    private List<RoleEntity> roles;
+	private boolean active = Boolean.TRUE;
+	@Enumerated(EnumType.STRING)
+    private RoleType role;
 
 	@ManyToMany(fetch = FetchType.LAZY)
 	@JoinTable(name = "user_exam", joinColumns = @JoinColumn(name = "user_id"), inverseJoinColumns = @JoinColumn(name = "exam_id"))
@@ -51,12 +48,5 @@ public class UserEntity extends BaseEntity{
 
 	@OneToMany(mappedBy = "user")
 	private List<ExamResultEntity> examResults;
-	
-	public void addRole(RoleEntity role) {
-		if(CollectionUtils.isEmpty(this.roles)) {
-			this.roles = new ArrayList<>();
-		}
 
-        this.roles.add(role);
-	}
 }

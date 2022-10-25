@@ -2,9 +2,10 @@ package com.project.service.impl;
 
 import com.project.config.UserAuth;
 import com.project.dto.UserDto;
-import com.project.entity.RoleEntity;
 import com.project.entity.UserEntity;
+import com.project.enums.RoleType;
 import com.project.repository.UserRepository;
+import com.project.request.ChangePasswordRequest;
 import com.project.request.UserRequest;
 import com.project.response.UserResponse;
 import com.project.service.UserService;
@@ -92,9 +93,9 @@ public class UserServiceImpl implements UserService {
         }
 
         user = mapper.map(req, UserEntity.class);
-        RoleEntity urole = new RoleEntity("ROLE_USER");
-        user.addRole(urole);
+
         user.setPassword(passwordEncoder.encode(req.getPassword()));
+        user.setRole(RoleType.ROLE_USER);
 
         UserDto dto = mapper.map(repository.save(user), UserDto.class);
 
@@ -176,6 +177,7 @@ public class UserServiceImpl implements UserService {
         user.setLastName(request.getLastName());
         user.setGender(request.getGender());
         user.setBirthDay(new Date(request.getBirthDay()));
+        user.setCity(request.getCity());
 
         response.setDto(mapper.map(repository.save(user), UserDto.class));
         response.setMessage("OK");
@@ -201,14 +203,31 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public UserResponse changePassword(UserRequest request) {
-        return null;
+    public UserResponse changePassword(ChangePasswordRequest request) {
+        UserEntity user = userAuth.getCurrent();
+
+        UserResponse response = new UserResponse();
+        if(!passwordEncoder.encode(request.getOldPassword()).equals(user.getPassword())){
+            response.setMessage(" old password not match in db");
+            response.setStatusCode(HttpStatus.BAD_REQUEST);
+        }
+        user.setPassword(passwordEncoder.encode(request.getNewPassword()));
+        try{
+            repository.save(user);
+            response.setMessage("OK");
+            response.setStatusCode(HttpStatus.OK);
+        }catch (Exception e){
+            response.setMessage(e.getMessage());
+            response.setStatusCode(HttpStatus.BAD_REQUEST);
+        }
+
+       return response;
     }
 
     @Override
     public UserResponse getAllUserNoneDeleted(Integer page, Integer size) {
         Pageable pageable = PageRequest.of(page - 1, size, Sort.by("modifiedDate").descending());
-        Page<UserEntity> curPage = repository.findByDeletedFalse(pageable);
+        Page<UserEntity> curPage = repository.findByDeletedFalseAndRoleEquals(pageable,RoleType.ROLE_USER);
 
         List<UserEntity> userEntities = curPage.getContent();
         var userDtos = userEntities.stream()
@@ -221,6 +240,33 @@ public class UserServiceImpl implements UserService {
         response.setMessage("ok");
         response.setStatusCode(HttpStatus.OK);
 
+        return response;
+    }
+
+    @Override
+    public UserResponse deactivate(Long id) {
+        var optional = repository.findById(id);
+
+        UserResponse response = new UserResponse();
+        if(optional.isEmpty()){
+            response.setMessage("User not found");
+            response.setStatusCode(HttpStatus.NOT_FOUND);
+        }
+
+        var user = optional.get();
+
+        if(user.getRole().equals(RoleType.ROLE_ADMIN)){
+            response.setMessage("User is Admin");
+            response.setStatusCode(HttpStatus.BAD_REQUEST);
+        }
+
+        user.setActive(false);
+        user.setDeleted(true);
+
+        repository.save(user);
+
+        response.setMessage("OK");
+        response.setStatusCode(HttpStatus.OK);
         return response;
     }
 

@@ -1,7 +1,7 @@
 package com.project.security;
 
-import com.project.entity.RoleEntity;
 import com.project.entity.UserEntity;
+import com.project.enums.RoleType;
 import io.jsonwebtoken.Claims;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
@@ -78,11 +78,9 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter{
 
 		// set role
 		List<String> roleList = (List<String>) claims.get("roles");
-		for (String aRoleName : roleList) {
-			RoleEntity roleEntity = new RoleEntity();
-			roleEntity.setName(aRoleName);
-	        user.addRole(roleEntity);
-	    }
+
+		String role = roleList.get(0);
+		user.setRole(RoleType.valueOf(role));
 
 		//get user name and set that
 		String subject = (String) claims.get(Claims.SUBJECT);

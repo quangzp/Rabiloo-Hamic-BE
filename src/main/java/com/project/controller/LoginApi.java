@@ -33,7 +33,6 @@ public class LoginApi {
 	@PostMapping("/login")
 	public ResponseEntity<?> authenticateUser(@Valid @RequestBody AuthRequest request) {
 		try {
-			// Xác thực từ username và password.
 			Authentication authentication = authenticationManager.authenticate(
 					new UsernamePasswordAuthenticationToken(
 							request.getUserName(),

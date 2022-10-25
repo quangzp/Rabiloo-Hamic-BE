@@ -1,6 +1,7 @@
 package com.project.service;
 
 import com.project.entity.UserEntity;
+import com.project.request.ChangePasswordRequest;
 import com.project.request.UserRequest;
 import com.project.response.UserResponse;
 
@@ -16,7 +17,9 @@ public interface UserService extends BaseService<UserResponse,UserRequest>{
 
     UserResponse getCurrent();
 
-    UserResponse changePassword(UserRequest request);
+    UserResponse changePassword(ChangePasswordRequest request);
 
     UserResponse getAllUserNoneDeleted(Integer page, Integer size);
+
+    UserResponse deactivate(Long id);
 }

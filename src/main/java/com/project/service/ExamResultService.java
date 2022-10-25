@@ -1,10 +1,13 @@
 package com.project.service;
 
+import com.project.dto.CountExamResultDto;
 import com.project.entity.ExamResultEntity;
 import com.project.request.ExamResultFilterRequest;
 import com.project.request.ExamResultRequest;
 import com.project.response.ExamResultResponse;
+import org.springframework.data.domain.Page;
 
+import java.util.List;
 import java.util.Optional;
 
 public interface ExamResultService extends BaseService<ExamResultResponse,ExamResultRequest> {
@@ -14,6 +17,9 @@ public interface ExamResultService extends BaseService<ExamResultResponse,ExamRe
 
     ExamResultResponse findExamsByParamNative(ExamResultFilterRequest req);
 
-    ExamResultResponse findExamResultsUser(Integer page, Integer size);
+    Page<ExamResultEntity> findExamResultsUser(Integer page, Integer size);
+
+    List<CountExamResultDto> count();
+
 
 }

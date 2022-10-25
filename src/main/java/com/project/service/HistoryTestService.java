@@ -3,5 +3,7 @@ package com.project.service;
 import com.project.response.HistoryTestResponse;
 
 public interface HistoryTestService {
-    HistoryTestResponse findAllByExam(Long examId);
+    HistoryTestResponse findAllByExamId(Long examId);
+
+    HistoryTestResponse findAllByUser(Integer page, Integer size);
 }
