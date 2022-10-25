@@ -6,4 +6,5 @@ import lombok.Data;
 public class HistoryTestDto extends BaseDto{
     private UserDto user;
     private ExamResultDto examResult;
+    private ExamDto exam;
 }

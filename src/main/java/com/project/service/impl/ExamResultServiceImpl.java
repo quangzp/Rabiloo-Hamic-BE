@@ -350,11 +350,19 @@ public class ExamResultServiceImpl implements ExamResultService {
     }
 
     @Override
-    public Page<ExamResultEntity> findExamResultsUser(Integer page, Integer size) {
+    public Page<ExamResultEntity> findByUser(Integer page, Integer size) {
         UserEntity user = userAuth.getCurrent();
 
         Pageable pageable = PageRequest.of(page-1,size, Sort.by("end").descending());
         Page<ExamResultEntity> pages = repository.findBySubmittedTrueAndUser_Id(user.getId(),pageable);
+
+        return pages;
+    }
+
+    @Override
+    public Page<ExamResultEntity> findByExamsId(Long examId, Integer page, Integer size) {
+        Pageable pageable = PageRequest.of(page-1,size, Sort.by("end").descending());
+        Page<ExamResultEntity> pages = repository.findBySubmittedTrueAndExam_Id(examId,pageable);
 
         return pages;
     }

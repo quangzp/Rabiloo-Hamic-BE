@@ -23,6 +23,8 @@ public interface ExamResultRepository extends JpaRepository<ExamResultEntity, Lo
 
     Page<ExamResultEntity> findBySubmittedTrueAndUser_Id(Long userId, Pageable pageable);
 
+    Page<ExamResultEntity> findBySubmittedTrueAndExam_Id(Long examId, Pageable pageable);
+
     @Query(value = "select new com.project.dto.CountExamResultDto(" +
             "count(ex),"+
             "ex.exam.id" +
@@ -31,5 +33,7 @@ public interface ExamResultRepository extends JpaRepository<ExamResultEntity, Lo
             "where ex.submitted = true " +
             "group by ex.exam.id")
     List<CountExamResultDto> countExamResults();
+
+
 
 }

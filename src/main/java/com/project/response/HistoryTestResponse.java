@@ -1,7 +1,10 @@
 package com.project.response;
 
 import com.project.dto.HistoryTestDto;
+import lombok.Data;
 
+@Data
 public class HistoryTestResponse extends BaseResponse<HistoryTestDto>{
-    private String titleExam;
+    private Long total;
+    private String commonTitleExam;
 }

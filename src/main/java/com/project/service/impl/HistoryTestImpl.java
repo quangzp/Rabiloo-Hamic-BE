@@ -1,15 +1,15 @@
 package com.project.service.impl;
 
-import com.project.config.UserAuth;
+import com.project.dto.ExamDto;
 import com.project.dto.ExamResultDto;
+import com.project.dto.HistoryTestDto;
+import com.project.dto.UserDto;
 import com.project.entity.ExamEntity;
 import com.project.entity.ExamResultEntity;
-import com.project.response.ExamResultResponse;
 import com.project.response.HistoryTestResponse;
 import com.project.service.ExamResultService;
 import com.project.service.ExamService;
 import com.project.service.HistoryTestService;
-import com.project.service.UserService;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -21,14 +21,10 @@ import java.util.List;
 
 @Service
 public class HistoryTestImpl implements HistoryTestService {
-    @Autowired
-    private UserAuth userAuth;
+
 
     @Autowired
     private ModelMapper mapper;
-
-    @Autowired
-    private UserService userService;
 
     @Autowired
     private ExamResultService examResultService;
@@ -37,31 +33,86 @@ public class HistoryTestImpl implements HistoryTestService {
     private ExamService examService;
 
     @Override
-    public HistoryTestResponse findAllByExamId(Long examId) {
-        ExamEntity exam = examService.findAllInfoExamById(examId);
+    public HistoryTestResponse findAllByExamId(Long examId, Integer page, Integer size) {
+        ExamEntity examEntity = examService.findById(examId);
 
-        return null;
+        HistoryTestResponse response = new HistoryTestResponse();
+        if(examEntity == null){
+            response.setMessage("Exam not found");
+            response.setStatusCode(HttpStatus.NOT_FOUND);
+            return response;
+        }
+
+        Page<ExamResultEntity> pages = examResultService.findByExamsId(examId,page,size);
+        var examResultEntities = pages.getContent();
+
+        List<HistoryTestDto> historyTests = new ArrayList<>();
+        for (ExamResultEntity examResultEntity : examResultEntities) {
+            ExamResultDto examResult = mapper.map(examResultEntity,ExamResultDto.class);
+            UserDto user = mapper.map(examResultEntity.getUser(),UserDto.class);
+
+            HistoryTestDto historyTest = new HistoryTestDto();
+            historyTest.setUser(user);
+            historyTest.setExamResult(examResult);
+
+            historyTests.add(historyTest);
+        }
+
+        response.setDtos(historyTests);
+        response.setTotal(pages.getTotalElements());
+        response.setCommonTitleExam(examEntity.getTitle());
+        response.setMessage("ok");
+        response.setStatusCode(HttpStatus.OK);
+
+        return response;
     }
 
     @Override
     public HistoryTestResponse findAllByUser(Integer page, Integer size) {
-        Page<ExamResultEntity> pages = examResultService.findExamResultsUser(page,size);
+        Page<ExamResultEntity> pages = examResultService.findByUser(page,size);
 
         var examResultEntities = pages.getContent();
-        List<ExamResultDto> examResultDtos = new ArrayList<>();
+
+        List<HistoryTestDto> historyTests = new ArrayList<>();
         for (ExamResultEntity examResultEntity : examResultEntities) {
-            ExamResultDto examResultDto = mapper.map(examResultEntity,ExamResultDto.class);
-            //examResultDto.setTitleExam(examResultEntity.getExam().getTitle());
-            examResultDtos.add(examResultDto);
+            ExamResultDto examResult = mapper.map(examResultEntity,ExamResultDto.class);
+            ExamDto exam = mapper.map(examResultEntity.getExam(),ExamDto.class);
+
+            HistoryTestDto historyTest = new HistoryTestDto();
+            historyTest.setExamResult(examResult);
+            historyTest.setExam(exam);
+
+            historyTests.add(historyTest);
         }
 
-        ExamResultResponse response = new ExamResultResponse();
+        HistoryTestResponse response = new HistoryTestResponse();
         response.setTotal(pages.getTotalElements());
-        response.setDtos(examResultDtos);
+        response.setDtos(historyTests);
         response.setMessage("ok");
         response.setStatusCode(HttpStatus.OK);
 
-        //return response;
-        return null;
+        return response;
+    }
+
+    @Override
+    public HistoryTestResponse findAll(Integer page, Integer size) {
+        Page pages = examService.findAll(page,size);
+
+        var examEntities = pages.getContent();
+
+        List<HistoryTestDto> historyTests = new ArrayList<>();
+        for (Object examEntity : examEntities) {
+            HistoryTestDto historyTest = new HistoryTestDto();
+            historyTest.setExam(mapper.map(examEntity, ExamDto.class));
+
+            historyTests.add(historyTest);
+        }
+
+        HistoryTestResponse response = new HistoryTestResponse();
+        response.setDtos(historyTests);
+        response.setMessage("OK");
+        response.setStatusCode(HttpStatus.OK);
+
+        return response;
     }
 }

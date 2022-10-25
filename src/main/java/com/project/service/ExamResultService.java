@@ -17,7 +17,9 @@ public interface ExamResultService extends BaseService<ExamResultResponse,ExamRe
 
     ExamResultResponse findExamsByParamNative(ExamResultFilterRequest req);
 
-    Page<ExamResultEntity> findExamResultsUser(Integer page, Integer size);
+    Page<ExamResultEntity> findByUser(Integer page, Integer size);
+
+    Page<ExamResultEntity> findByExamsId(Long examId, Integer page, Integer size);
 
     List<CountExamResultDto> count();
 

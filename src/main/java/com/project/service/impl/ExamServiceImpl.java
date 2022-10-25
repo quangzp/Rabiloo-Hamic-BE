@@ -22,6 +22,7 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
+import org.springframework.data.domain.*;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
@@ -128,7 +129,7 @@ public class ExamServiceImpl implements ExamService {
             List<CountExamResultDto> countExamResultDtos = countExamResults();
             for (ExamDto dto : dtos) {
                 for (CountExamResultDto countExamResultDto : countExamResultDtos) {
-                    if(dto.getId() == countExamResultDto.getExamId()){
+                    if (dto.getId() == countExamResultDto.getExamId()) {
                         dto.setTotalExamResult(countExamResultDto.getTotal());
                         break;
                     }
@@ -252,11 +253,12 @@ public class ExamServiceImpl implements ExamService {
 
     public ExamEntity findById(Long id) {
 
-        ExamEntity exam = repositoryCustom.findExamById(id);
-        if (exam != null) {
-            return exam;
+        Optional<ExamEntity> exam = repository.findById(id);
+        if (exam.isPresent()) {
+            if (!exam.get().getDeleted()) {
+                return exam.get();
+            }
         }
-
         return null;
     }
 
@@ -388,7 +390,7 @@ public class ExamServiceImpl implements ExamService {
         List<CountExamResultDto> countExamResultDtos = countExamResults();
         for (ExamDto dto : dtos) {
             for (CountExamResultDto countExamResultDto : countExamResultDtos) {
-                if(dto.getId() == countExamResultDto.getExamId()){
+                if (dto.getId() == countExamResultDto.getExamId()) {
                     dto.setTotalExamResult(countExamResultDto.getTotal());
                     break;
                 }
@@ -581,6 +583,7 @@ public class ExamServiceImpl implements ExamService {
 
     /**
      * Import exam via excel file
+     *
      * @param file file
      * @throws IOException ioException
      */
@@ -623,12 +626,12 @@ public class ExamServiceImpl implements ExamService {
 
     private void mapQuestionForAnsAndImages(List<QuestionEntity> questions) {
         for (QuestionEntity question : questions) {
-            if(!CollectionUtils.isEmpty(question.getAnswers())) {
+            if (!CollectionUtils.isEmpty(question.getAnswers())) {
                 for (AnswerEntity answer : question.getAnswers()) {
                     answer.setQuestion(question);
                 }
             }
-            if(!CollectionUtils.isEmpty(question.getImages())) {
+            if (!CollectionUtils.isEmpty(question.getImages())) {
                 for (MediaEntity image : question.getImages()) {
                     image.setQuestion(question);
                 }
@@ -664,6 +667,34 @@ public class ExamServiceImpl implements ExamService {
     @Override
     public ExamEntity findAllInfoExamById(Long examId) {
         return repositoryCustom.findExamById(examId);
+    }
+
+    @Override
+    public Page<ExamEntity> findAll(Integer page, Integer size) {
+        Pageable pageable = PageRequest.of(page - 1, size, Sort.by("modifiedDate").descending());
+
+        Page<ExamEntity> pages = repository.findByDeletedFalse(pageable);
+
+        List<ExamEntity> entities = pages.getContent();
+
+        ExamResponse response = new ExamResponse();
+        if (entities.isEmpty()) {
+            return null;
+        }
+        List<ExamDto> dtos = new ArrayList<>();
+        entities.forEach(e -> dtos.add(toDto(e)));
+
+        List<CountExamResultDto> countExamResultDtos = countExamResults();
+        for (ExamDto dto : dtos) {
+            for (CountExamResultDto countExamResultDto : countExamResultDtos) {
+                if (dto.getId() == countExamResultDto.getExamId()) {
+                    dto.setTotalExamResult(countExamResultDto.getTotal());
+                    break;
+                }
+            }
+        }
+
+        return pages;
     }
 
     private QuestionEntity createQuestionFromRows(List<Row> rows) {
@@ -744,7 +775,7 @@ public class ExamServiceImpl implements ExamService {
                 image.setPath(cells.get(0).getStringCellValue());
             } else if (cellsSize == 3) {
                 String path = cells.get(2).getStringCellValue();
-                if(path != null) {
+                if (path != null) {
                     image.setPath(cells.get(2).getStringCellValue());
                 } else {
                     return null;
@@ -772,7 +803,7 @@ public class ExamServiceImpl implements ExamService {
         }
     }
 
-    private List<CountExamResultDto> countExamResults(){
+    private List<CountExamResultDto> countExamResults() {
         return examResultService.count();
     }
 }

@@ -22,7 +22,8 @@ public class ExamRepositoryCustom {
                         "select distinct e " +
                                 "from ExamEntity e " +
                                 "        left outer join fetch e.questions as questions " +
-                                "where e.id = :examId", ExamEntity.class)
+                                "where e.id = :examId " +
+                                "   and e.deleted = false", ExamEntity.class)
                 .setParameter("examId", examId)
                 .setHint(QueryHints.PASS_DISTINCT_THROUGH, false)
                 .getSingleResult();
