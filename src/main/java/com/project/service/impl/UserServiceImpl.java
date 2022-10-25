@@ -9,6 +9,7 @@ import com.project.request.ChangePasswordRequest;
 import com.project.request.UserRequest;
 import com.project.response.UserResponse;
 import com.project.service.UserService;
+import com.project.service.user.ForgotPasswordService;
 import com.project.service.user.RegisterUserService;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -42,6 +43,9 @@ public class UserServiceImpl implements UserService {
 
     @Autowired
     private RegisterUserService registerUserService;
+
+    @Autowired
+    private ForgotPasswordService forgotPasswordService;
 
     @Override
     public UserResponse findAll() {
@@ -305,5 +309,30 @@ public class UserServiceImpl implements UserService {
         dto.setUserName(entity.getUserName());
 
         return dto;
+    }
+
+    @Override
+    public UserResponse resetPassword(String email, String token, String newPassword) {
+        UserResponse res = new UserResponse();
+        UserEntity user = repository.findByUserName(email);
+        if(user == null) {
+            res.setStatusCode(HttpStatus.NOT_FOUND);
+            res.setMessage("email not registered or deactivated");
+
+            return res;
+        }
+
+        if(!forgotPasswordService.check(email, token)) {
+            res.setStatusCode(HttpStatus.NOT_FOUND);
+            res.setMessage("token is invalid");
+
+            return res;
+        }
+
+        user.setPassword(passwordEncoder.encode(newPassword));
+
+        res.setStatusCode(HttpStatus.OK);
+
+        return res;
     }
 }

@@ -4,12 +4,12 @@ import com.project.entity.RegisterUser;
 import com.project.repository.RegisterUserRepository;
 import com.project.repository.UserRepository;
 import com.project.service.EmailService;
+import com.project.utils.RandomUtilsHamic;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.util.Date;
-import java.util.Random;
 
 @Service
 public class RegisterUserService {
@@ -26,19 +26,7 @@ public class RegisterUserService {
     @Value("${fe-link}")
     private String feLink;
 
-    private String genRandomStringCode() {
-        int leftLimit = 97; // letter 'a'
-        int rightLimit = 122; // letter 'z'
-        int targetStringLength = 10;
-        Random random = new Random();
-        StringBuilder buffer = new StringBuilder(targetStringLength);
-        for (int i = 0; i < targetStringLength; i++) {
-            int randomLimitedInt = leftLimit + (int)
-                    (random.nextFloat() * (rightLimit - leftLimit + 1));
-            buffer.append((char) randomLimitedInt);
-        }
-        return buffer.toString();
-    }
+
 
     private String genRegisterMailContent(String registerCode, String email) {
         return "<p>Bạn đang đăng ký tài khoản tại webcontest-hamic-team7.</p>" +
@@ -54,7 +42,7 @@ public class RegisterUserService {
 
     public String requestRegister(String email) {
         //TODO add validate email later
-        String code = genRandomStringCode();
+        String code = RandomUtilsHamic.genRandomStringCode();
         new Thread(() -> emailService.senMimeMessageMail(
                 email,
                 "HAMIC WEBCONTEST - CONFIRM REGISTER",

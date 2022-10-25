@@ -22,4 +22,6 @@ public interface UserService extends BaseService<UserResponse,UserRequest>{
     UserResponse getAllUserNoneDeleted(Integer page, Integer size);
 
     UserResponse deactivate(Long id);
+
+    UserResponse resetPassword(String email, String token, String newPassword);
 }

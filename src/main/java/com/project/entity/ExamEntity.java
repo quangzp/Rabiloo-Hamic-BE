@@ -36,6 +36,9 @@ public class ExamEntity extends BaseEntity {
     @Column
     private Date endTo;
 
+    @Column(name = "total_time", nullable = false)
+    private Integer totalTime;
+
     @OneToMany(mappedBy = "exam", cascade = CascadeType.ALL)
     private List<QuestionEntity> questions;
 

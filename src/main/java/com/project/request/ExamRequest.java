@@ -11,4 +11,5 @@ public class ExamRequest {
     private String code;
     private Long startFrom;
     private Long endTo;
+    private Integer totalTime;
 }
