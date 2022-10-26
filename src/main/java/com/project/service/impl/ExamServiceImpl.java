@@ -699,12 +699,29 @@ public class ExamServiceImpl implements ExamService {
         Row totalTimeRow = rows.get(3);
         Cell totalTimeCell = totalTimeRow.getCell(1);
         if (Objects.nonNull(totalTimeCell)) {
-            int totalTime = Double.valueOf(totalTimeCell.getStringCellValue()).intValue();
+            int totalTime = getTotalTimeFromCell(totalTimeCell);
             exam.setTotalTime(totalTime);
         }
 
 
         return exam;
+    }
+
+    private Integer getTotalTimeFromCell(Cell cell) {
+        try {
+            CellType type = cell.getCellType();
+            if(CellType.NUMERIC.equals(type)) {
+                return Double.valueOf(cell.getNumericCellValue()).intValue();
+            }
+
+            if(CellType.STRING.equals(type)) {
+                return Double.valueOf(cell.getStringCellValue().trim()).intValue();
+            }
+        } catch (Exception e) {
+            // do nothing
+        }
+
+        return 0;
     }
 
     @Override
