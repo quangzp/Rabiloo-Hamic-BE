@@ -290,10 +290,11 @@ public class ExamResultServiceImpl implements ExamResultService {
         QuestionResultEntity questionResult = new QuestionResultEntity();
         questionResult.setQuestion(question);
         List<String> results;
-        if (question.getAnswerWithTextsResult() == null) {
+        List<AnswerEntity> answers = question.getAnswers();
+        if (answers == null || answers.isEmpty()) {
             results = new ArrayList<>();
         } else {
-            results = List.of(question.getAnswerWithTextsResult().trim().split(","));
+            results = List.of(answers.get(0).getContent().trim().split(","));
         }
         boolean isAnswerRight = results.contains(request.getContent());
         if (isAnswerRight) {

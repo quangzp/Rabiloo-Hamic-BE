@@ -54,7 +54,7 @@ public class QuestionEntity extends BaseEntity{
 	@JoinColumn(name = "category_id")
 	private CategoryEntity category;
 
-	private String answerWithTextsResult; // Lien Xo|Nga|Lien Bang Nga
+	//private String answerWithTextsResult; // Lien Xo|Nga|Lien Bang Nga
 
 	//private boolean requireAdminGiveGrade; // default values false
 }
