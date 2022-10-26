@@ -701,6 +701,8 @@ public class ExamServiceImpl implements ExamService {
         if (Objects.nonNull(totalTimeCell)) {
             int totalTime = getTotalTimeFromCell(totalTimeCell);
             exam.setTotalTime(totalTime);
+        }else{
+            exam.setTotalTime(60);
         }
 
         return exam;
