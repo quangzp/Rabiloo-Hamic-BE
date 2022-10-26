@@ -703,7 +703,6 @@ public class ExamServiceImpl implements ExamService {
             exam.setTotalTime(totalTime);
         }
 
-
         return exam;
     }
 

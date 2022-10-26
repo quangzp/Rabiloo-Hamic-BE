@@ -3,6 +3,7 @@ package com.project.controller;
 import com.project.request.ExamFilterRequest;
 import com.project.request.ExamRequest;
 import com.project.response.ExamResponse;
+import com.project.response.UserResponse;
 import com.project.service.ExamService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.InputStreamResource;
@@ -84,7 +85,9 @@ public class ExamController {
     }
 
     @PostMapping("admin/import-excel")
-    public void importExamFromExcel(@RequestParam MultipartFile file) throws IOException {
+    public UserResponse importExamFromExcel(@RequestParam MultipartFile file) throws IOException {
         service.importExamFromExcelFile(file);
+
+        return new UserResponse();
     }
 }
