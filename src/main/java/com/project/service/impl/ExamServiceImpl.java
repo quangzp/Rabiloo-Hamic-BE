@@ -203,7 +203,7 @@ public class ExamServiceImpl implements ExamService {
         ExamResponse response = new ExamResponse();
         try {
             var examDataSaver = mapper.map(req, ExamEntity.class);
-            if(req.getTotalTime() == null){
+            if (req.getTotalTime() == null) {
                 examDataSaver.setTotalTime(60);
             }
             ExamEntity entity = repository.save(examDataSaver);
@@ -228,7 +228,7 @@ public class ExamServiceImpl implements ExamService {
             response.setMessage("Not found exam");
             response.setStatusCode(HttpStatus.NOT_FOUND);
         } else {
-            if(req.getTotalTime() == null){
+            if (req.getTotalTime() == null) {
                 req.setTotalTime(60);
             }
             ExamEntity entity = repository.save(mapper.map(req, ExamEntity.class));
@@ -469,12 +469,12 @@ public class ExamServiceImpl implements ExamService {
         fillExamRow(rows.get(1), "Chi tiết: ", exam.getDescription(), headerStyle);
 
         // code of exam
-        if(exam.getCode() != null){
+        if (exam.getCode() != null) {
             fillExamRow(rows.get(2), "Mã code: ", exam.getCode(), headerStyle);
         }
 
         // total of time
-        if(exam.getTotalTime() != null){
+        if (exam.getTotalTime() != null) {
             fillExamRow(rows.get(3), "Thời gian làm bài: ", exam.getTotalTime().toString(), headerStyle);
         }
     }
@@ -593,17 +593,17 @@ public class ExamServiceImpl implements ExamService {
         dto.setRequireCode(Objects.nonNull(entity.getCode()));
 
         dto.setId(entity.getId());
-        if(user != null){
+        if (user != null) {
             if (user.getRole().equals(RoleType.ROLE_ADMIN)) {
                 dto.setCode(entity.getCode());
             }
         }
 
-        if(entity.getModifiedDate() !=null){
+        if (entity.getModifiedDate() != null) {
             dto.setModifiedDate(entity.getModifiedDate().getTime());
         }
 
-        if(entity.getCreatedDate() != null){
+        if (entity.getCreatedDate() != null) {
             dto.setCreatedDate(entity.getCreatedDate().getTime());
         }
         dto.setTitle(entity.getTitle());
@@ -698,8 +698,8 @@ public class ExamServiceImpl implements ExamService {
 
         Row totalTimeRow = rows.get(3);
         Cell totalTimeCell = totalTimeRow.getCell(1);
-        if(Objects.nonNull(totalTimeCell)) {
-            int totalTime = Double.valueOf(totalTimeCell.getNumericCellValue()).intValue();
+        if (Objects.nonNull(totalTimeCell)) {
+            int totalTime = Double.valueOf(totalTimeCell.getStringCellValue()).intValue();
             exam.setTotalTime(totalTime);
         }
 
