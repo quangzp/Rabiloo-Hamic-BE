@@ -615,6 +615,8 @@ public class ExamServiceImpl implements ExamService {
         dto.setStartFrom(entity.getStartFrom());
         dto.setEndTo(entity.getEndTo());
 
+        dto.setQuestions(entity.getQuestions().stream().map(q->mapper.map(q,QuestionDto.class)).collect(Collectors.toList()));
+
         return dto;
     }
 
