@@ -590,7 +590,8 @@ public class ExamServiceImpl implements ExamService {
         }
     }
 
-    ExamDto toDto(ExamEntity entity) {
+    @Override
+    public ExamDto toDto(ExamEntity entity) {
         var user = userAuth.getCurrent();
         ExamDto dto = new ExamDto();
         dto.setRequireCode(Objects.nonNull(entity.getCode()));

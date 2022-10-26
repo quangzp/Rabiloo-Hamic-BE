@@ -1,5 +1,6 @@
 package com.project.service;
 
+import com.project.dto.ExamDto;
 import com.project.entity.ExamEntity;
 import com.project.request.ExamFilterRequest;
 import com.project.request.ExamRequest;
@@ -27,5 +28,7 @@ public interface ExamService extends BaseService<ExamResponse, ExamRequest> {
     ExamEntity findAllInfoExamById(Long examId);
 
     Page<ExamEntity> findAll(Integer page, Integer size);
+
+    ExamDto toDto(ExamEntity entity);
 
 }

@@ -98,12 +98,12 @@ public class HistoryTestImpl implements HistoryTestService {
     public HistoryTestResponse findAll(Integer page, Integer size) {
         Page pages = examService.findAll(page,size);
 
-        var examEntities = pages.getContent();
+        List<ExamEntity> examEntities = pages.getContent();
 
         List<HistoryTestDto> historyTests = new ArrayList<>();
-        for (Object examEntity : examEntities) {
+        for (ExamEntity examEntity : examEntities) {
             HistoryTestDto historyTest = new HistoryTestDto();
-            historyTest.setExam(mapper.map(examEntity, ExamDto.class));
+            historyTest.setExam(examService.toDto(examEntity));
 
             historyTests.add(historyTest);
         }
