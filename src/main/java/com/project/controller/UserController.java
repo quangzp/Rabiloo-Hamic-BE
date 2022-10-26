@@ -49,11 +49,6 @@ public class UserController {
         return service.changePassword(request);
     }
 
-    @PutMapping("/user/user-reset-password")
-    public UserResponse resetPassword(@RequestParam String userName){
-        return null;
-    }
-
     @DeleteMapping("/admin/user-deactivate")
     public UserResponse deactivate(@RequestParam Long id){
         return service.deactivate(id);

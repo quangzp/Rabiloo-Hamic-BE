@@ -56,5 +56,4 @@ public class QuestionEntity extends BaseEntity{
 
 	private String answerWithTextsResult; // Lien Xo|Nga|Lien Bang Nga
 
-	private boolean requireAdminGiveGrade; // default values false
 }

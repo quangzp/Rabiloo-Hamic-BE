@@ -15,6 +15,7 @@ public class QuestionRequest {
     private Integer level;
     private Long examId;
     private Long categoryId;
+    private String answerWithTextsResult;
     List<AnswerRequest> answers;
     List<MediaRequest> images;
 }

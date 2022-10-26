@@ -115,8 +115,8 @@ public class ExamResultServiceImpl implements ExamResultService {
         String examCode = exam.getCode();
         String reqCode = req.getCode();
 
-        if(examCode != null){
-            if(reqCode == null || !examCode.equals(reqCode)){
+        if (examCode != null) {
+            if (reqCode == null || !examCode.equals(reqCode)) {
                 response.setMessage("not matching code");
                 response.setStatusCode(HttpStatus.BAD_REQUEST);
                 return response;
@@ -293,7 +293,7 @@ public class ExamResultServiceImpl implements ExamResultService {
         if (question.getAnswerWithTextsResult() == null) {
             results = new ArrayList<>();
         } else {
-            results = List.of(question.getAnswerWithTextsResult().split(","));
+            results = List.of(question.getAnswerWithTextsResult().trim().split(","));
         }
         boolean isAnswerRight = results.contains(request.getContent());
         if (isAnswerRight) {
@@ -364,16 +364,16 @@ public class ExamResultServiceImpl implements ExamResultService {
     public Page<ExamResultEntity> findByUser(Integer page, Integer size) {
         UserEntity user = userAuth.getCurrent();
 
-        Pageable pageable = PageRequest.of(page-1,size, Sort.by("end").descending());
-        Page<ExamResultEntity> pages = repository.findBySubmittedTrueAndUser_Id(user.getId(),pageable);
+        Pageable pageable = PageRequest.of(page - 1, size, Sort.by("end").descending());
+        Page<ExamResultEntity> pages = repository.findBySubmittedTrueAndUser_Id(user.getId(), pageable);
 
         return pages;
     }
 
     @Override
     public Page<ExamResultEntity> findByExamsId(Long examId, Integer page, Integer size) {
-        Pageable pageable = PageRequest.of(page-1,size, Sort.by("end").descending());
-        Page<ExamResultEntity> pages = repository.findBySubmittedTrueAndExam_Id(examId,pageable);
+        Pageable pageable = PageRequest.of(page - 1, size, Sort.by("end").descending());
+        Page<ExamResultEntity> pages = repository.findBySubmittedTrueAndExam_Id(examId, pageable);
 
         return pages;
     }

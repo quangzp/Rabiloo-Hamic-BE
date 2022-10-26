@@ -3,7 +3,6 @@ package com.project.service.impl;
 import com.project.exception.StorageException;
 import com.project.service.StorageService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
 import org.springframework.stereotype.Service;
@@ -24,8 +23,7 @@ public class StorageServiceImpl implements StorageService {
 
     private final Path rootLocation;
 
-    @Value("${location}")
-    private String location;
+    private final static String location = "upload/";
 
     @Autowired
     public StorageServiceImpl() {
