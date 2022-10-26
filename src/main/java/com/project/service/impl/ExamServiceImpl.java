@@ -206,7 +206,7 @@ public class ExamServiceImpl implements ExamService {
             if (req.getTotalTime() == null) {
                 examDataSaver.setTotalTime(60);
             }
-            if(req.getCode().trim().equals("")){
+            if (req.getCode().trim().equals("")) {
                 examDataSaver.setCode(null);
             }
             ExamEntity entity = repository.save(examDataSaver);
@@ -615,7 +615,7 @@ public class ExamServiceImpl implements ExamService {
         dto.setStartFrom(entity.getStartFrom());
         dto.setEndTo(entity.getEndTo());
 
-        dto.setQuestions(entity.getQuestions().stream().map(q->mapper.map(q,QuestionDto.class)).collect(Collectors.toList()));
+        dto.setQuestions(entity.getQuestions().stream().map(q -> mapper.map(q, QuestionDto.class)).collect(Collectors.toList()));
 
         return dto;
     }
@@ -707,7 +707,7 @@ public class ExamServiceImpl implements ExamService {
         if (Objects.nonNull(totalTimeCell)) {
             int totalTime = getTotalTimeFromCell(totalTimeCell);
             exam.setTotalTime(totalTime);
-        }else{
+        } else {
             exam.setTotalTime(60);
         }
 
@@ -717,11 +717,11 @@ public class ExamServiceImpl implements ExamService {
     private Integer getTotalTimeFromCell(Cell cell) {
         try {
             CellType type = cell.getCellType();
-            if(CellType.NUMERIC.equals(type)) {
+            if (CellType.NUMERIC.equals(type)) {
                 return Double.valueOf(cell.getNumericCellValue()).intValue();
             }
 
-            if(CellType.STRING.equals(type)) {
+            if (CellType.STRING.equals(type)) {
                 return Double.valueOf(cell.getStringCellValue().trim()).intValue();
             }
         } catch (Exception e) {
@@ -754,7 +754,7 @@ public class ExamServiceImpl implements ExamService {
         List<CountExamResultDto> countExamResultDtos = countExamResults();
         for (ExamDto dto : dtos) {
             for (CountExamResultDto countExamResultDto : countExamResultDtos) {
-                if (dto.getId() == countExamResultDto.getExamId()) {
+                if (Objects.equals(dto.getId(), countExamResultDto.getExamId())) {
                     dto.setTotalExamResult(countExamResultDto.getTotal());
                     break;
                 }
@@ -768,14 +768,14 @@ public class ExamServiceImpl implements ExamService {
         QuestionEntity question = new QuestionEntity();
         Row firstRow = rows.get(0);
         List<Cell> cells = Lists.newArrayList(firstRow.cellIterator());
-        setContentForQuestion(question, cells.get(1));
-        setMaxPointForQuestion(question, cells.get(3));
-        setTypeForQuestion(question, cells.get(4));
+        setContentForQuestion(question, getCellByColumnIndex(cells, 1));
+        setMaxPointForQuestion(question, getCellByColumnIndex(cells, 3));
+        setTypeForQuestion(question, getCellByColumnIndex(cells, 4));
 
         List<AnswerEntity> answers = new ArrayList<>();
         List<MediaEntity> images = new ArrayList<>();
         for (int i = 0; i < rows.size(); i++) {
-            answers.add(createAnswerFromRow(rows.get(i), i));
+            answers.add(createAnswerFromRow(rows.get(i)));
             MediaEntity image = createImageObjFromRow(rows.get(i), i);
             if (image != null && image.getPath() != null) {
                 images.add(image);
@@ -813,43 +813,33 @@ public class ExamServiceImpl implements ExamService {
         }
     }
 
-    private AnswerEntity createAnswerFromRow(Row row, int index) {
-
+    private AnswerEntity createAnswerFromRow(Row row) {
         AnswerEntity answer = new AnswerEntity();
         List<Cell> cells = Lists.newArrayList(row.cellIterator());
-        if (index == 0) {
-            setContentForAnswer(answer, cells.get(6));
-            setResultForAnswer(answer, cells.get(7));
-        } else {
-            setContentForAnswer(answer, cells.get(0));
-            setResultForAnswer(answer, cells.get(1));
+
+        Cell contentCell = getCellByColumnIndex(cells, 6);
+        Cell resultCell = getCellByColumnIndex(cells, 7);
+        if (contentCell == null || resultCell == null) {
+            return null;
         }
+
+        setContentForAnswer(answer, contentCell);
+        setResultForAnswer(answer, resultCell);
 
         return answer;
     }
 
     private MediaEntity createImageObjFromRow(Row row, int index) {
         MediaEntity image = new MediaEntity();
-        List<Cell> cells = Lists.newArrayList(row.cellIterator());
-        int cellsSize = cells.size();
-        if (index == 0) {
-            if (cellsSize < 9) {
-                return null;
-            }
-            image.setPath(cells.get(8).getStringCellValue());
-        } else {
-            if (cellsSize == 1) {
-                image.setPath(cells.get(0).getStringCellValue());
-            } else if (cellsSize == 3) {
-                String path = cells.get(2).getStringCellValue();
-                if (path != null) {
-                    image.setPath(cells.get(2).getStringCellValue());
-                } else {
-                    return null;
-                }
-            }
-        }
         image.setType("image");
+
+        List<Cell> cells = Lists.newArrayList(row.cellIterator());
+        Cell pathCell = getCellByColumnIndex(cells, 8);
+        if (pathCell == null) {
+            return null;
+        }
+
+        image.setPath(pathCell.getStringCellValue());
 
         return image;
     }
@@ -868,6 +858,16 @@ public class ExamServiceImpl implements ExamService {
         } catch (Exception e) {
             log.info("set content for answer fail");
         }
+    }
+
+    private Cell getCellByColumnIndex(List<Cell> cells, int columnIndex) {
+        for (Cell cell : cells) {
+            if (cell.getColumnIndex() == columnIndex) {
+                return cell;
+            }
+        }
+
+        return null;
     }
 
     private List<CountExamResultDto> countExamResults() {
