@@ -51,18 +51,20 @@ public class ExamEntity extends BaseEntity {
     @Transient
     private Long totalExamResults;
 
-	public ExamEntity(Long id, String title, String description, String type, String code, Date startFrom, Date endTo) {
-		this.setId(id);
-		this.title = title;
-		this.description = description;
-		this.type = type;
-		this.code = code;
-		this.startFrom = startFrom;
-		this.endTo = endTo;
+    public ExamEntity(Long id, String title, String description, String type, String code, Date startFrom, Date endTo, Date modifiedDate, Date createdDate) {
+        this.setId(id);
+        this.setModifiedDate(modifiedDate);
+        this.setCreatedDate(createdDate);
+        this.title = title;
+        this.description = description;
+        this.type = type;
+        this.code = code;
+        this.startFrom = startFrom;
+        this.endTo = endTo;
         //this.totalExamResults = totalExamResults;
-	}
+    }
 
-	public ExamEntity() {
+    public ExamEntity() {
 
-	}
+    }
 }

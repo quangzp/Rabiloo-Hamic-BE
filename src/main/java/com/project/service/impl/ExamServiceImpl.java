@@ -228,6 +228,9 @@ public class ExamServiceImpl implements ExamService {
             response.setMessage("Not found exam");
             response.setStatusCode(HttpStatus.NOT_FOUND);
         } else {
+            if(req.getTotalTime() == null){
+                req.setTotalTime(60);
+            }
             ExamEntity entity = repository.save(mapper.map(req, ExamEntity.class));
             ExamDto dto = mapper.map(entity, ExamDto.class);
 
@@ -585,8 +588,18 @@ public class ExamServiceImpl implements ExamService {
         ExamDto dto = new ExamDto();
 
         dto.setId(entity.getId());
-        if (user.getRole().equals(RoleType.ROLE_ADMIN)) {
-            dto.setCode(entity.getCode());
+        if(user != null){
+            if (user.getRole().equals(RoleType.ROLE_ADMIN)) {
+                dto.setCode(entity.getCode());
+            }
+        }
+
+        if(entity.getModifiedDate() !=null){
+            dto.setModifiedDate(entity.getModifiedDate().getTime());
+        }
+
+        if(entity.getCreatedDate() != null){
+            dto.setCreatedDate(entity.getCreatedDate().getTime());
         }
         dto.setTitle(entity.getTitle());
         dto.setDescription(entity.getDescription());
