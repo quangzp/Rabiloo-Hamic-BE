@@ -206,6 +206,9 @@ public class ExamServiceImpl implements ExamService {
             if (req.getTotalTime() == null) {
                 examDataSaver.setTotalTime(60);
             }
+            if(req.getCode().trim().equals("")){
+                examDataSaver.setCode(null);
+            }
             ExamEntity entity = repository.save(examDataSaver);
             ExamDto dto = mapper.map(entity, ExamDto.class);
 
