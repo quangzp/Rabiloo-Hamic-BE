@@ -9,6 +9,8 @@ import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+
 
 @Repository
 public interface UserRepository extends JpaRepository<UserEntity, Long> {
@@ -17,4 +19,6 @@ public interface UserRepository extends JpaRepository<UserEntity, Long> {
 	UserEntity findByUserName(String userName);
 
 	Page<UserEntity> findByDeletedFalseAndRoleEquals(Pageable pageable, RoleType userType);
+
+    List<UserEntity> findByDeletedFalse();
 }

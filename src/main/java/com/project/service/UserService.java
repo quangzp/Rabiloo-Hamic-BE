@@ -5,6 +5,7 @@ import com.project.request.ChangePasswordRequest;
 import com.project.request.UserRequest;
 import com.project.response.UserResponse;
 
+import java.util.List;
 import java.util.Optional;
 
 public interface UserService extends BaseService<UserResponse,UserRequest>{
@@ -20,6 +21,8 @@ public interface UserService extends BaseService<UserResponse,UserRequest>{
     UserResponse changePassword(ChangePasswordRequest request);
 
     UserResponse getAllUserNoneDeleted(Integer page, Integer size);
+
+    List<UserEntity> getAllUsers();
 
     UserResponse deactivate(Long id);
 

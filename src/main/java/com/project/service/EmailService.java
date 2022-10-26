@@ -33,7 +33,7 @@ public class EmailService {
             helper.setTo(to);
             helper.setText(text, true);
 
-            emailSender.send(mail);
+            new Thread(() -> emailSender.send(mail)).start();
         } catch (MessagingException e) {
             throw new RuntimeException(e);
         }

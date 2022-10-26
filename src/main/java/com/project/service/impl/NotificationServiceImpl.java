@@ -3,10 +3,13 @@ package com.project.service.impl;
 import com.project.dto.AnswerDto;
 import com.project.dto.NotificationDto;
 import com.project.entity.NotificationEntity;
+import com.project.entity.UserEntity;
 import com.project.repository.NotificationRepository;
 import com.project.request.NotificationRequest;
 import com.project.response.NotificationResponse;
+import com.project.service.EmailService;
 import com.project.service.NotificationService;
+import com.project.service.UserService;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -24,6 +27,12 @@ public class NotificationServiceImpl implements NotificationService {
 
     @Autowired
     private ModelMapper mapper;
+
+    @Autowired
+    private UserService userService;
+
+    @Autowired
+    private EmailService emailService;
 
     @Override
     public NotificationResponse findAll() {
@@ -73,9 +82,21 @@ public class NotificationServiceImpl implements NotificationService {
             response.setDto(dto);
             response.setMessage("OK");
             response.setStatusCode(HttpStatus.OK);
+
+            // send mail to all users
+            List<UserEntity> users = userService.getAllUsers();
+            new Thread(() -> {
+                users.parallelStream().forEach(user -> {
+                    sendNotiMailToUser(user.getUserName(), notification);
+                });
+            }).start();
         }
 
         return response;
+    }
+
+    private void sendNotiMailToUser(String email, NotificationEntity noti) {
+        emailService.senMimeMessageMail(email, noti.getTitle(), noti.getDescription());
     }
 
     @Override

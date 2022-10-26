@@ -265,6 +265,11 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    public List<UserEntity> getAllUsers() {
+        return repository.findByDeletedFalse();
+    }
+
+    @Override
     public UserResponse deactivate(Long id) {
         var optional = repository.findById(id);
 

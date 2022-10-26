@@ -6,6 +6,7 @@ import com.project.dto.HistoryTestDto;
 import com.project.dto.UserDto;
 import com.project.entity.ExamEntity;
 import com.project.entity.ExamResultEntity;
+import com.project.entity.UserEntity;
 import com.project.response.HistoryTestResponse;
 import com.project.service.ExamResultService;
 import com.project.service.ExamService;
@@ -18,6 +19,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 @Service
 public class HistoryTestImpl implements HistoryTestService {
@@ -49,12 +51,15 @@ public class HistoryTestImpl implements HistoryTestService {
         List<HistoryTestDto> historyTests = new ArrayList<>();
         for (ExamResultEntity examResultEntity : examResultEntities) {
             ExamResultDto examResult = mapper.map(examResultEntity,ExamResultDto.class);
-            UserDto user = mapper.map(examResultEntity.getUser(),UserDto.class);
-
             HistoryTestDto historyTest = new HistoryTestDto();
-            historyTest.setUser(user);
-            historyTest.setExamResult(examResult);
 
+            UserEntity us = examResultEntity.getUser();
+            if(Objects.nonNull(us)) {
+                UserDto user = mapper.map(examResultEntity.getUser(), UserDto.class);
+                historyTest.setUser(user);
+            }
+
+            historyTest.setExamResult(examResult);
             historyTests.add(historyTest);
         }
 
