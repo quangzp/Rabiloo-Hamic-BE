@@ -469,10 +469,14 @@ public class ExamServiceImpl implements ExamService {
         fillExamRow(rows.get(1), "Chi tiết: ", exam.getDescription(), headerStyle);
 
         // code of exam
-        fillExamRow(rows.get(2), "Mã code: ", exam.getCode(), headerStyle);
+        if(exam.getCode() != null){
+            fillExamRow(rows.get(2), "Mã code: ", exam.getCode(), headerStyle);
+        }
 
         // total of time
-        fillExamRow(rows.get(3), "Thời gian làm bài: ", exam.getTotalExamResults().toString(), headerStyle);
+        if(exam.getTotalTime() != null){
+            fillExamRow(rows.get(3), "Thời gian làm bài: ", exam.getTotalTime().toString(), headerStyle);
+        }
     }
 
     private void fillExamRow(Row row, String titleStr, String content, CellStyle cellStyle) {

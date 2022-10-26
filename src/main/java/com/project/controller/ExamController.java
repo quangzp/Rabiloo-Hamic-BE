@@ -73,7 +73,7 @@ public class ExamController {
         return service.findExamsByParamNative(request);
     }
 
-    @GetMapping("public/get-exam-excel-file")
+    @GetMapping("admin/get-exam-excel-file")
     public ResponseEntity<Resource> getExamExcelFile(Long examId) {
         InputStreamResource file = new InputStreamResource(service.genExamExcelFile(examId));
 
