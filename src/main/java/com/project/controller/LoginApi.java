@@ -17,7 +17,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import javax.validation.Valid;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -31,7 +30,7 @@ public class LoginApi {
 	private JwtTokenProvider tokenProvider;
 	
 	@PostMapping("/login")
-	public ResponseEntity<?> authenticateUser(@Valid @RequestBody AuthRequest request) {
+	public ResponseEntity<?> authenticateUser(@RequestBody AuthRequest request) {
 		try {
 			Authentication authentication = authenticationManager.authenticate(
 					new UsernamePasswordAuthenticationToken(
