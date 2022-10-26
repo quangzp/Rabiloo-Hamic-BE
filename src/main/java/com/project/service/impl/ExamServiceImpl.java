@@ -134,7 +134,7 @@ public class ExamServiceImpl implements ExamService {
             List<CountExamResultDto> countExamResultDtos = countExamResults();
             for (ExamDto dto : dtos) {
                 for (CountExamResultDto countExamResultDto : countExamResultDtos) {
-                    if (dto.getId() == countExamResultDto.getExamId()) {
+                    if (Objects.equals(dto.getId(), countExamResultDto.getExamId())) {
                         dto.setTotalExamResult(countExamResultDto.getTotal());
                         break;
                     }
@@ -590,6 +590,7 @@ public class ExamServiceImpl implements ExamService {
     ExamDto toDto(ExamEntity entity) {
         var user = userAuth.getCurrent();
         ExamDto dto = new ExamDto();
+        dto.setRequireCode(Objects.nonNull(entity.getCode()));
 
         dto.setId(entity.getId());
         if(user != null){

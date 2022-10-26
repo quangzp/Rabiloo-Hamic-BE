@@ -19,7 +19,8 @@ public interface ExamRepository extends JpaRepository<ExamEntity, Long>{
     //@EntityGraph(attributePaths = {"questions", "questions.answers"})
     @Query(value = "select * from exam " +
             "where exam.code is null" +
-            " and exam.deleted = false ",nativeQuery = true)
+            " and exam.deleted = false " +
+            " order by exam.modified_date desc;",nativeQuery = true)
     List<ExamEntity> findByCodeNullAndDeletedFalse();
 
 
