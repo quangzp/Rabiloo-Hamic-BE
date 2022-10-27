@@ -203,9 +203,8 @@ public class ExamServiceImpl implements ExamService {
         ExamResponse response = new ExamResponse();
         try {
             var examDataSaver = mapper.map(req, ExamEntity.class);
-            if (req.getTotalTime() == null) {
-                examDataSaver.setTotalTime(60);
-            }
+            examDataSaver.setTotalTime(Objects.requireNonNullElse(req.getTotalTime(), 60));
+
             if (req.getCode().trim().equals("")) {
                 examDataSaver.setCode(null);
             }
