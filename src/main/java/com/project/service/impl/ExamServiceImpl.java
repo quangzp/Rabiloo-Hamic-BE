@@ -371,12 +371,14 @@ public class ExamServiceImpl implements ExamService {
     @Override
     public ExamResponse findExamsByParamNative(ExamFilterRequest request) {
         String code = request.getCode();
-        if (code != null)
+        if (code != null) {
             code = "%" + request.getCode() + "%";
+        }
 
         String title = request.getTitle();
-        if (title != null)
+        if (title != null) {
             title = "%" + request.getTitle() + "%";
+        }
 
         List<ExamEntity> entities = repository.findExamsByParamNative(code, title,
                 request.getStart(), request.getEnd());
@@ -666,11 +668,11 @@ public class ExamServiceImpl implements ExamService {
 
         exam.setQuestions(questions);
 
-        var examSaved = repository.save(exam);
+        repository.save(exam);
     }
 
     private boolean isNumbericalOrder(Cell cell) {
-        if(cell.getColumnIndex() > 0) {
+        if (cell.getColumnIndex() > 0) {
             return false;
         }
 
@@ -807,7 +809,7 @@ public class ExamServiceImpl implements ExamService {
         List<MediaEntity> images = new ArrayList<>();
         for (int i = 0; i < rows.size(); i++) {
             answers.add(createAnswerFromRow(rows.get(i)));
-            MediaEntity image = createImageObjFromRow(rows.get(i), i);
+            MediaEntity image = createImageObjFromRow(rows.get(i));
             if (image != null && image.getPath() != null) {
                 images.add(image);
             }
@@ -860,13 +862,13 @@ public class ExamServiceImpl implements ExamService {
         return answer;
     }
 
-    private MediaEntity createImageObjFromRow(Row row, int index) {
+    private MediaEntity createImageObjFromRow(Row row) {
         MediaEntity image = new MediaEntity();
         image.setType("image");
 
         List<Cell> cells = Lists.newArrayList(row.cellIterator());
         Cell pathCell = getCellByColumnIndex(cells, 8);
-        if (pathCell == null) {
+        if (pathCell == null || "".equals(getStringCell(pathCell).trim())) {
             return null;
         }
 
