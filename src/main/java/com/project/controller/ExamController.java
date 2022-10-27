@@ -5,10 +5,12 @@ import com.project.request.ExamRequest;
 import com.project.response.ExamResponse;
 import com.project.response.UserResponse;
 import com.project.service.ExamService;
+import org.apache.catalina.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -84,10 +86,13 @@ public class ExamController {
                 .body(file);
     }
 
-    @PostMapping("admin/import-excel")
+    @PostMapping("public/import-excel") // TODO change "public" to "admin"
     public UserResponse importExamFromExcel(@RequestParam MultipartFile file) throws IOException {
         service.importExamFromExcelFile(file);
 
-        return new UserResponse();
+        var res = new UserResponse();
+        res.setStatusCode(HttpStatus.OK);
+
+        return res;
     }
 }

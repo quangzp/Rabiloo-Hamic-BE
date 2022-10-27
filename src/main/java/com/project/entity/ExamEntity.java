@@ -29,7 +29,7 @@ public class ExamEntity extends BaseEntity {
     private String description;
     @Column
     private String type;
-    @Column(unique = true)
+    @Column
     private String code;
     @Column
     private Date startFrom;

@@ -647,7 +647,7 @@ public class ExamServiceImpl implements ExamService {
         List<Row> rs = new ArrayList<>();
         for (Row row : rows) {
             Cell firstCell = row.cellIterator().next();
-            if (firstCell.getColumnIndex() > 0) {
+            if (!isNumbericalOrder(firstCell)) {
                 rs.add(row);
             } else {
                 if (rs.size() == 0) {
@@ -667,7 +667,14 @@ public class ExamServiceImpl implements ExamService {
         exam.setQuestions(questions);
 
         var examSaved = repository.save(exam);
+    }
 
+    private boolean isNumbericalOrder(Cell cell) {
+        if(cell.getColumnIndex() > 0) {
+            return false;
+        }
+
+        return !"".equals(getStringCell(cell).trim());
     }
 
     private void mapQuestionForAnsAndImages(List<QuestionEntity> questions) {
@@ -712,7 +719,7 @@ public class ExamServiceImpl implements ExamService {
         Row totalTimeRow = rows.get(3);
         Cell totalTimeCell = totalTimeRow.getCell(1);
         if (Objects.nonNull(totalTimeCell)) {
-            int totalTime = getTotalTimeFromCell(totalTimeCell);
+            int totalTime = getNumberCell(totalTimeCell);
             exam.setTotalTime(totalTime);
         } else {
             exam.setTotalTime(60);
@@ -721,7 +728,7 @@ public class ExamServiceImpl implements ExamService {
         return exam;
     }
 
-    private Integer getTotalTimeFromCell(Cell cell) {
+    private Integer getNumberCell(Cell cell) {
         try {
             CellType type = cell.getCellType();
             if (CellType.NUMERIC.equals(type)) {
@@ -736,6 +743,23 @@ public class ExamServiceImpl implements ExamService {
         }
 
         return 0;
+    }
+
+    private String getStringCell(Cell cell) {
+        try {
+            CellType type = cell.getCellType();
+            if (CellType.NUMERIC.equals(type)) {
+                return Double.valueOf(cell.getNumericCellValue()).toString();
+            }
+
+            if (CellType.STRING.equals(type)) {
+                return cell.getStringCellValue();
+            }
+        } catch (Exception e) {
+            // do nothing
+        }
+
+        return "";
     }
 
     @Override
