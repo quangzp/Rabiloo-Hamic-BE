@@ -16,6 +16,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
@@ -44,6 +45,7 @@ public class NotificationServiceImpl implements NotificationService {
         } else {
             List<NotificationDto> dtos = new ArrayList<>();
             entities.forEach(e -> dtos.add(mapper.map(e, NotificationDto.class)));
+            Collections.reverse(dtos);
             response.setDtos(dtos);
             response.setMessage("OK");
             response.setStatusCode(HttpStatus.OK);
