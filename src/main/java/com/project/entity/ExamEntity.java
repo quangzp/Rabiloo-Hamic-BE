@@ -36,7 +36,7 @@ public class ExamEntity extends BaseEntity {
     @Column
     private Date endTo;
 
-    @Column(name = "total_time")
+    @Column
     private Integer totalTime;
 
     @OneToMany(mappedBy = "exam", cascade = CascadeType.ALL)
