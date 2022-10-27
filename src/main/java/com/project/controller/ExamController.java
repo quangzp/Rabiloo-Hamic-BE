@@ -86,7 +86,7 @@ public class ExamController {
                 .body(file);
     }
 
-    @PostMapping("public/import-excel") // TODO change "public" to "admin"
+    @PostMapping("admin/import-excel")
     public UserResponse importExamFromExcel(@RequestParam MultipartFile file) throws IOException {
         service.importExamFromExcelFile(file);
 
