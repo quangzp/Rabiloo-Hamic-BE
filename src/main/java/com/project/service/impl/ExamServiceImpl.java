@@ -129,7 +129,12 @@ public class ExamServiceImpl implements ExamService {
             response.setStatusCode(HttpStatus.OK);
         } else {
             List<ExamDto> dtos = new ArrayList<>();
-            entities.forEach(e -> dtos.add(toDto(e)));
+            entities.forEach(e -> {
+                var dto = toDto(e);
+                dto.setTotalTime(e.getTotalTime());
+
+                dtos.add(dto);
+            });
 
             List<CountExamResultDto> countExamResultDtos = countExamResults();
             for (ExamDto dto : dtos) {
@@ -780,7 +785,6 @@ public class ExamServiceImpl implements ExamService {
 
         List<ExamEntity> entities = pages.getContent();
 
-        ExamResponse response = new ExamResponse();
         if (entities.isEmpty()) {
             return null;
         }
