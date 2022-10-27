@@ -611,7 +611,11 @@ public class ExamServiceImpl implements ExamService {
         if (entity.getCreatedDate() != null) {
             dto.setCreatedDate(entity.getCreatedDate().getTime());
         }
+
         dto.setTitle(entity.getTitle());
+        dto.setCode(entity.getCode());
+        dto.setTotalTime(entity.getTotalTime());
+        dto.setType(entity.getType());
         dto.setDescription(entity.getDescription());
         dto.setStartFrom(entity.getStartFrom());
         dto.setEndTo(entity.getEndTo());
