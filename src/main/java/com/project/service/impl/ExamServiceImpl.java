@@ -129,12 +129,7 @@ public class ExamServiceImpl implements ExamService {
             response.setStatusCode(HttpStatus.OK);
         } else {
             List<ExamDto> dtos = new ArrayList<>();
-            entities.forEach(e -> {
-                var dto = toDto(e);
-                dto.setTotalTime(e.getTotalTime());
-
-                dtos.add(dto);
-            });
+            entities.forEach(e -> dtos.add(toDto(e)));
 
             List<CountExamResultDto> countExamResultDtos = countExamResults();
             for (ExamDto dto : dtos) {

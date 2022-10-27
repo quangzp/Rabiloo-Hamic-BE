@@ -51,7 +51,8 @@ public class ExamEntity extends BaseEntity {
     @Transient
     private Long totalExamResults;
 
-    public ExamEntity(Long id, String title, String description, String type, String code, Date startFrom, Date endTo, Date modifiedDate, Date createdDate) {
+    public ExamEntity(Long id, String title, String description, String type, String code, Date startFrom, Date endTo,
+                      Date modifiedDate, Date createdDate, Integer totalTime) {
         this.setId(id);
         this.setModifiedDate(modifiedDate);
         this.setCreatedDate(createdDate);
@@ -61,7 +62,7 @@ public class ExamEntity extends BaseEntity {
         this.code = code;
         this.startFrom = startFrom;
         this.endTo = endTo;
-        //this.totalExamResults = totalExamResults;
+        this.totalTime = totalTime;
     }
 
     public ExamEntity() {

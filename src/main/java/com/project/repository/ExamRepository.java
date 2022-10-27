@@ -43,7 +43,8 @@ public interface ExamRepository extends JpaRepository<ExamEntity, Long>{
             "e.startFrom," +
             "e.endTo," +
             "e.modifiedDate,"+
-            "e.createdDate "+
+            "e.createdDate," +
+            "e.totalTime"+
             ")"+
             "from ExamEntity e " +
             "where e.deleted = false " +
