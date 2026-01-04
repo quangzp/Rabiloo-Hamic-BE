@@ -26,7 +26,8 @@ public class EmailService {
     public void senMimeMessageMail(String to, String subject, String text) {
         try {
             MimeMessage mail = emailSender.createMimeMessage();
-            mail.setSubject(subject, "UTF-8");
+            String encoding = "UTF-8";
+            mail.setSubject(subject, encoding);
 
             MimeMessageHelper helper = new MimeMessageHelper(mail, true, "UTF-8");
             helper.setFrom("rabiloo.hamic.team7@gmail.com");
