@@ -150,8 +150,10 @@ public class QuestionResultServiceImpl implements QuestionResultService {
         QuestionResultDto dto = mapper.map(repository.save(entity),QuestionResultDto.class);
 
         return new ResponseEntity<>(dto,HttpStatus.OK);*/
-
-        return null;
+        QuestionResultResponse response = new QuestionResultResponse();
+        response.setMessage("OK");
+        response.setStatusCode(HttpStatus.OK);
+        return response;
     }
 
     @Override
