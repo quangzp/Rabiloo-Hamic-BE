@@ -66,7 +66,7 @@ public class HistoryTestImpl implements HistoryTestService {
         response.setDtos(historyTests);
         response.setTotal(pages.getTotalElements());
         response.setCommonTitleExam(examEntity.getTitle());
-        response.setMessage("ok");
+        response.setMessage("OK");
         response.setStatusCode(HttpStatus.OK);
 
         return response;
