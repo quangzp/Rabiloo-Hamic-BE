@@ -42,7 +42,7 @@ public class AnswerServiceImpl implements AnswerService {
         List<AnswerEntity> entities = repository.findAll();
         AnswerResponse response = new AnswerResponse();
         if (entities.isEmpty()) {
-            response.setMessage("answers is null");
+            response.setMessage("Answers is null");
             response.setStatusCode(HttpStatus.NOT_FOUND);
         } else {
             List<AnswerDto> dtos = new ArrayList<>();
